@@ -1,12 +1,16 @@
 /* Base theme */
 :root {
-  --bg: #0d0d0f;         /* near-black (not pure) */
-  --text: #ffffff;       /* white text */
-  --muted: #cccccc;
+  --bg: #0d0d0f;      /* near-black (not pure) */
+  --text: #ffffff;    /* white text */
+  --muted: #bfbfbf;
 
   /* Buttons */
   --btn-radius: 4px;
-  --chromatic: linear-gradient(90deg, #7c4dff, #00e5ff); /* simple chroma */
+  --chromatic: linear-gradient(90deg, #7c4dff, #00e5ff);
+
+  /* Panels / borders */
+  --border: #2a2a2f;
+  --panel: #121215;
 }
 
 /* Reset-ish */
@@ -21,7 +25,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Layout containers (kept minimal) */
+/* Layout containers */
 .container {
   width: min(1100px, 92vw);
   margin: 0 auto;
@@ -30,14 +34,11 @@ body {
 /* Navbar */
 .nav {
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-weight: 500;                /* Inter 500 */
+  font-weight: 500; /* Inter 500 */
   padding: 16px 0;
 }
 
-.brand {
-  display: inline-block;
-  /* top-left; container handles centering margins */
-}
+.brand { display: inline-block; }
 
 /* Hero */
 .hero {
@@ -47,7 +48,7 @@ body {
 
 .hero-title {
   font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  font-weight: 550;               /* Inter variable supports in-between weights */
+  font-weight: 550; /* Inter variable allows mid-weight */
   font-size: clamp(32px, 6vw, 64px);
   line-height: 1.05;
   margin: 0 0 12px 0;
@@ -78,18 +79,76 @@ body {
 
 .btn-chromatic {
   background: var(--chromatic);
-  color: var(--bg);               /* text matches page background (dark) */
+  color: var(--bg); /* text matches page background (dark) */
   border-color: transparent;
 }
 
 .btn-white {
   background: #ffffff;
-  color: var(--bg);               /* text matches page background (dark) */
+  color: var(--bg); /* text matches page background (dark) */
   border: 1px solid #eaeaea;
 }
 
-/* Demo modules section (empty by design) */
+/* Modules section */
 .modules {
-  /* Intentionally minimal; you'll add content later */
   padding: 40px 0 80px;
+}
+
+/* Showroom (A-Frame) */
+.showroom {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .showroom { grid-template-columns: 1fr; }
+}
+
+.scene-wrap {
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 360px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.panel-title {
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #7c4dff;
+  background: transparent;
+}
+
+.select {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--btn-radius);
+  padding: 8px 10px;
+  font-size: 14px;
 }
