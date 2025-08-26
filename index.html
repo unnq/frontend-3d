@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FutureForge — Cutting-Edge Marketing</title>
+
+    <!-- A-Frame for quick 3D experiments -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+    <!-- React (no build): UMD + Babel so we can write JSX in-browser -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+      :root {
+        --bg: #0b0f14;
+        --card: #121821;
+        --text: #e9eef5;
+        --muted: #9bb0c3;
+        --accent: #53e3f6;
+        --accent-2: #8a7dff;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+        background: radial-gradient(1200px 600px at 80% -10%, rgba(83,227,246,0.18), transparent 60%),
+                    radial-gradient(800px 500px at 10% -20%, rgba(138,125,255,0.18), transparent 60%),
+                    var(--bg);
+        color: var(--text);
+      }
+      a { color: var(--accent); text-decoration: none; }
+      header, main, footer { width: min(1100px, 92vw); margin: 0 auto; }
+      .hero {
+        padding: 96px 0 40px;
+        display: grid;
+        gap: 18px;
+      }
+      .badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 6px 10px; border-radius: 999px; background: rgba(83,227,246,0.12); color: var(--accent);
+        width: fit-content; font-size: 12px; letter-spacing: 0.3px;
+      }
+      .title {
+        font-size: clamp(32px, 5vw, 56px);
+        line-height: 1.05; font-weight: 800;
+        background: linear-gradient(90deg, #e9eef5, #b8c6d8);
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      .subtitle { color: var(--muted); font-size: 18px; max-width: 70ch; }
+      .cta { display: flex; gap: 12px; margin-top: 8px; }
+      .btn {
+        padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(233,238,245,0.1);
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+        color: var(--text); cursor: pointer; transition: transform .08s ease, background .2s ease;
+      }
+      .btn:hover { transform: translateY(-1px); }
+      .btn.primary { border-color: rgba(83,227,246,0.4); background: linear-gradient(180deg, rgba(83,227,246,0.3), rgba(83,227,246,0.12)); }
+      .grid {
+        display: grid; gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        margin: 28px 0 64px;
+      }
+      .card {
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)), var(--card);
+        border: 1px solid rgba(233,238,245,0.08);
+        border-radius: 16px; padding: 18px; display: grid; gap: 10px;
+      }
+      .card h3 { margin: 0; font-size: 18px; }
+      .muted { color: var(--muted); font-size: 14px; }
+      .showroom {
+        display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; align-items: stretch;
+        margin-bottom: 80px;
+      }
+      @media (max-width: 900px) { .showroom { grid-template-columns: 1fr; } }
+      .scene-wrap {
+        position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(233,238,245,0.08);
+        background: #000;
+        min-height: 380px;
+      }
+      .panel {
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)), var(--card);
+        border: 1px solid rgba(233,238,245,0.08);
+        border-radius: 16px; padding: 18px; display: grid; gap: 12px; height: 100%;
+      }
+      .row { display: flex; gap: 10px; flex-wrap: wrap; }
+      footer { padding: 40px 0 80px; color: var(--muted); font-size: 14px; text-align: center; }
+      .pill { padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(233,238,245,0.12); }
+      .note { font-size: 12px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useState, useMemo } = React;
+
+      // --- Reusable UI bits (React advantage #1: components) ---
+      function Badge({ icon, children }) {
+        return <span className="badge">{icon}<span>{children}</span></span>;
+      }
+
+      function Button({ children, onClick, primary }) {
+        const cls = "btn" + (primary ? " primary" : "");
+        return <button className={cls} onClick={onClick}>{children}</button>;
+      }
+
+      // --- Sections ---
+      function Hero() {
+        return (
+          <header className="hero">
+            <Badge icon="⚡">Next-Gen Marketing Studio</Badge>
+            <h1 className="title">We craft immersive web experiences that convert.</h1>
+            <p className="subtitle">
+              3D scenes, reactive interfaces, and content that actually sells.
+              Built fast, tested live, iterated relentlessly.
+            </p>
+            <div className="cta">
+              <Button primary onClick={() => window.scrollTo({ top: document.body.scrollHeight/3, behavior: 'smooth' })}>
+                Explore the Showroom
+              </Button>
+              <a className="btn" href="#contact">Get in touch</a>
+            </div>
+          </header>
+        );
+      }
+
+      function Services() {
+        // One array → many cards (React advantage #2: props-driven reuse)
+        const items = [
+          { title: "Web & UI", desc: "Lightning-fast sites with modern UX that lift conversions." },
+          { title: "Brand Systems", desc: "Visual identity, messaging, and design language." },
+          { title: "3D / WebGL", desc: "A-Frame & Three.js scenes for memorable launches." },
+          { title: "AI Content", desc: "Automated landing pages, smart funnels, and testing." },
+        ];
+        return (
+          <main>
+            <div className="grid">
+              {items.map((it, i) => (
+                <article className="card" key={i}>
+                  <h3>{it.title}</h3>
+                  <p className="muted">{it.desc}</p>
+                </article>
+              ))}
+            </div>
+          </main>
+        );
+      }
+
+      // A-Frame inside React (React advantage #3: state controls attributes)
+      function Showroom() {
+        const [hue, setHue] = useState(200);     // 0–360
+        const [speed, setSpeed] = useState(2);   // seconds per rotation
+        const [shape, setShape] = useState("box"); // box | sphere | torus
+
+        // Convert hue → hex color for A-Frame material
+        const color = useMemo(() => hslToHex(hue, 70, 55), [hue]);
+
+        // Use a tiny component switch to render different primitives
+        const Primitive = ({ shape, ...rest }) => {
+          if (shape === "sphere") return <a-sphere {...rest}></a-sphere>;
+          if (shape === "torus") return <a-torus radius="1" radius-tubular="0.16" {...rest}></a-torus>;
+          return <a-box depth="1" height="1" width="1" {...rest}></a-box>;
+        };
+
+        return (
+          <section className="showroom">
+            <div className="scene-wrap">
+              <a-scene embedded vr-mode-ui="enabled: false" renderer="colorManagement: true; antialias: true">
+                <a-entity position="0 1.2 3">
+                  <a-camera wasd-controls-enabled="false"></a-camera>
+                </a-entity>
+
+                {/* Floor + lights */}
+                <a-plane rotation="-90 0 0" width="20" height="20" color="#0a0e14"></a-plane>
+                <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+                <a-entity light="type: directional; intensity: 0.9" position="2 4 1"></a-entity>
+
+                {/* The hero object, React controls its attributes */}
+                <a-entity position="0 1 -1">
+                  <Primitive
+                    shape={shape}
+                    material={`color: ${color}; metalness: 0.2; roughness: 0.3`}
+                    animation={`property: rotation; to: 0 360 0; loop: true; dur: ${speed * 1000}; easing: linear`}
+                  />
+                </a-entity>
+              </a-scene>
+            </div>
+
+            <aside className="panel">
+              <div className="pill">Showroom Controls</div>
+              <div className="row">
+                <Button onClick={() => setShape("box")}>Box</Button>
+                <Button onClick={() => setShape("sphere")}>Sphere</Button>
+                <Button onClick={() => setShape("torus")}>Torus</Button>
+              </div>
+              <div>
+                <div className="muted">Color Hue: {hue}°</div>
+                <input type="range" min="0" max="360" value={hue}
+                       onChange={e => setHue(parseInt(e.target.value, 10))} style={{ width: "100%" }} />
+              </div>
+              <div>
+                <div className="muted">Rotation Speed: {speed.toFixed(1)}s</div>
+                <input type="range" min="0.5" max="6" step="0.5" value={speed}
+                       onChange={e => setSpeed(parseFloat(e.target.value))} style={{ width: "100%" }} />
+              </div>
+              <p className="note">
+                <strong>React advantage:</strong> Changing state updates the DOM attributes for A-Frame automatically.
+                In vanilla JS you’d manually query elements and set attributes on each change.
+              </p>
+            </aside>
+          </section>
+        );
+      }
+
+      function Footer() {
+        return (
+          <footer id="contact">
+            © {new Date().getFullYear()} FutureForge — <a href="#">hello@futureforge.agency</a>
+          </footer>
+        );
+      }
+
+      function App() {
+        return (
+          <>
+            <Hero />
+            <Services />
+            <Showroom />
+            <Footer />
+          </>
+        );
+      }
+
+      // Render
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<App />);
+
+      // --- tiny helper: HSL → HEX (for the hue slider) ---
+      function hslToHex(h, s, l) {
+        s /= 100; l /= 100;
+        const c = (1 - Math.abs(2*l - 1)) * s;
+        const x = c * (1 - Math.abs((h/60) % 2 - 1));
+        const m = l - c/2;
+        let [r,g,b] = [0,0,0];
+        if (0 <= h && h < 60) [r,g,b] = [c,x,0];
+        else if (60 <= h && h < 120) [r,g,b] = [x,c,0];
+        else if (120 <= h && h < 180) [r,g,b] = [0,c,x];
+        else if (180 <= h && h < 240) [r,g,b] = [0,x,c];
+        else if (240 <= h && h < 300) [r,g,b] = [x,0,c];
+        else [r,g,b] = [c,0,x];
+        const toHex = v => Math.round((v+m)*255).toString(16).padStart(2, "0");
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+      }
+    </script>
+  </body>
+</html>
