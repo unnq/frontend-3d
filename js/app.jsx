@@ -441,12 +441,114 @@ function ShowroomThreeSeamless() {
   );
 }
 
+function FilterableGames() {
+  // simple local dataset (titles only, no images)
+  const games = React.useMemo(() => ([
+    { id: 1,  title: "Elden Ring",               genre: "rpg",        platform: "pc",    year: 2022, score: 96 },
+    { id: 2,  title: "Hades",                    genre: "roguelike",  platform: "switch",year: 2020, score: 93 },
+    { id: 3,  title: "Celeste",                  genre: "platformer", platform: "switch",year: 2018, score: 92 },
+    { id: 4,  title: "Baldur’s Gate 3",          genre: "rpg",        platform: "pc",    year: 2023, score: 96 },
+    { id: 5,  title: "Forza Horizon 5",          genre: "racing",     platform: "xbox",  year: 2021, score: 92 },
+    { id: 6,  title: "God of War Ragnarök",      genre: "action",     platform: "ps5",   year: 2022, score: 94 },
+    { id: 7,  title: "Stardew Valley",           genre: "sim",        platform: "switch",year: 2016, score: 89 },
+    { id: 8,  title: "Return of the Obra Dinn",  genre: "puzzle",     platform: "pc",    year: 2018, score: 89 },
+    { id: 9,  title: "Death Stranding",          genre: "adventure",  platform: "ps5",   year: 2019, score: 85 },
+    { id: 10, title: "Minecraft",                genre: "sandbox",    platform: "pc",    year: 2011, score: 93 },
+  ]), []);
+
+  // controls (React state = instant updates, no "Apply" button)
+  const [query, setQuery]       = React.useState("");
+  const [genre, setGenre]       = React.useState("all");
+  const [platform, setPlatform] = React.useState("all");
+  const [sort, setSort]         = React.useState("scoreDesc"); // scoreDesc | scoreAsc | yearDesc | yearAsc | alpha
+
+  // derived list (filter + sort), memoized for snappiness
+  const visible = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let list = games.filter(g =>
+      (genre === "all" || g.genre === genre) &&
+      (platform === "all" || g.platform === platform) &&
+      (q === "" || g.title.toLowerCase().includes(q))
+    );
+    if (sort === "scoreDesc") list.sort((a,b) => b.score - a.score);
+    if (sort === "scoreAsc")  list.sort((a,b) => a.score - b.score);
+    if (sort === "yearDesc")  list.sort((a,b) => b.year - a.year);
+    if (sort === "yearAsc")   list.sort((a,b) => a.year - b.year);
+    if (sort === "alpha")     list.sort((a,b) => a.title.localeCompare(b.title));
+    return list;
+  }, [games, query, genre, platform, sort]);
+
+  return (
+    <section className="modules">
+      <div className="container">
+        {/* control panel */}
+        <div className="panel" style={{ marginBottom: 12 }}>
+          <div className="panel-title">Games — Filter & Sort</div>
+          <div className="row" style={{ gap: 10 }}>
+            <input
+              className="input"
+              placeholder="Search titles…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              aria-label="Search games"
+            />
+            <select className="select" value={genre} onChange={(e)=>setGenre(e.target.value)} aria-label="Filter by genre">
+              <option value="all">All genres</option>
+              <option value="action">Action</option>
+              <option value="adventure">Adventure</option>
+              <option value="puzzle">Puzzle</option>
+              <option value="platformer">Platformer</option>
+              <option value="rpg">RPG</option>
+              <option value="roguelike">Roguelike</option>
+              <option value="racing">Racing</option>
+              <option value="sim">Sim</option>
+              <option value="sandbox">Sandbox</option>
+            </select>
+            <select className="select" value={platform} onChange={(e)=>setPlatform(e.target.value)} aria-label="Filter by platform">
+              <option value="all">All platforms</option>
+              <option value="pc">PC</option>
+              <option value="ps5">PS5</option>
+              <option value="switch">Switch</option>
+              <option value="xbox">Xbox</option>
+            </select>
+            <select className="select" value={sort} onChange={(e)=>setSort(e.target.value)} aria-label="Sort">
+              <option value="scoreDesc">Score ↓</option>
+              <option value="scoreAsc">Score ↑</option>
+              <option value="yearDesc">Year ↓</option>
+              <option value="yearAsc">Year ↑</option>
+              <option value="alpha">A → Z</option>
+            </select>
+          </div>
+        </div>
+
+        {/* results */}
+        {visible.length === 0 ? (
+          <div className="panel"><p className="muted" style={{ margin: 0 }}>No results.</p></div>
+        ) : (
+          <div className="grid">
+            {visible.map(g => (
+              <article key={g.id} className="card">
+                <h3 style={{ margin: 0 }}>{g.title}</h3>
+                <p className="muted" style={{ margin: "6px 0 0" }}>
+                  Genre: {g.genre} • Platform: {g.platform} • Year: {g.year} • Score: {g.score}
+                </p>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+
 /* ----------------- App ----------------- */
 function App() {
   return (
     <>
       <Nav />
       <Hero />
+      <FilterableGames />
       <ShowroomAFrame />
       <ShowroomThree />
       <ShowroomAFrameSeamless />
