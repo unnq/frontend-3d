@@ -33,13 +33,7 @@
   <body>
     <div id="root"></div>
 
-    <!-- Make OrbitControls available globally -->
-    <script type="module">
-      import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
-    // expose to non-module code
-      window.THREE_OrbitControls = OrbitControls;
-    </script>
-    
+   
     <!-- React app -->
     <script type="text/babel" data-presets="env,react" src="./js/app.jsx"></script>
   </body>
