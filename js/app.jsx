@@ -113,7 +113,7 @@ function ShowroomAFrame() {
 function ShowroomThree() {
   const [shape, setShape] = useState("box"); // "box" | "sphere" | "torus"
   const [hue, setHue] = useState(200);       // 0–360
-  const [speed, setSpeed] = useState(2);     // seconds per rotation
+  const [speed, setSpeed] = useState(2);     // seconds per full rotation
 
   const mountRef = useRef(null);
   const rendererRef = useRef(null);
@@ -122,12 +122,12 @@ function ShowroomThree() {
   const meshRef = useRef(null);
   const controlsRef = useRef(null);
   const rafRef = useRef(null);
+  const clockRef = useRef(null);
 
-  // keep latest speed visible to the animation loop
+  // keep latest speed available to the animate loop
   const speedRef = useRef(speed);
   useEffect(() => { speedRef.current = speed; }, [speed]);
 
-  // Init Three once
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
@@ -135,7 +135,7 @@ function ShowroomThree() {
     const width = mount.clientWidth;
     const height = mount.clientHeight || 380;
 
-    // Scene + subtle fog to give depth
+    // Scene + subtle fog for depth
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x0a0e14, 6, 14);
 
@@ -150,7 +150,7 @@ function ShowroomThree() {
     renderer.shadowMap.enabled = true;
     mount.appendChild(renderer.domElement);
 
-    // Lights (soft, slightly cinematic)
+    // Lights
     const hemi = new THREE.HemisphereLight(0xffffff, 0x0a0e14, 0.7);
     const dir = new THREE.DirectionalLight(0xffffff, 0.9);
     dir.position.set(3, 5, 2);
@@ -158,7 +158,7 @@ function ShowroomThree() {
     dir.shadow.mapSize.set(1024, 1024);
     scene.add(hemi, dir);
 
-    // Floor (receives shadow, slightly rough)
+    // Floor
     const floorMat = new THREE.MeshStandardMaterial({ color: 0x0a0e14, roughness: 0.95, metalness: 0.0 });
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMat);
     floor.rotation.x = -Math.PI / 2;
@@ -166,18 +166,22 @@ function ShowroomThree() {
     floor.receiveShadow = true;
     scene.add(floor);
 
-    // Mesh (default, updated by effects below)
+    // Mesh (updated by effects below)
     const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.3 });
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat);
     mesh.position.set(0, 1, 0);
     mesh.castShadow = true;
     scene.add(mesh);
 
-    // OrbitControls (mouse/touch to orbit)
-    const controls = new window.THREE_OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;  // inertia feel
+    // OrbitControls (UMD build exposes THREE.OrbitControls)
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.target.set(0, 1, 0);
+
+    // Clock for correct delta timing
+    const clock = new THREE.Clock();
+    clockRef.current = clock;
 
     // Resize
     const onResize = () => {
@@ -193,16 +197,16 @@ function ShowroomThree() {
     const animate = () => {
       rafRef.current = requestAnimationFrame(animate);
 
-      // radians per second = full turn (2π) / seconds per rotation
-      const rps = (2 * Math.PI) / Math.max(0.0001, speedRef.current);
-      mesh.rotation.y += rps * (renderer.info.render.frame ? 1/60 : 1/60); // baseline tick; controls.update handles timing feel
+      const delta = clock.getDelta(); // seconds since last frame
+      const radiansPerSec = (2 * Math.PI) / Math.max(0.0001, speedRef.current);
+      mesh.rotation.y += radiansPerSec * delta;
 
       controls.update();
       renderer.render(scene, camera);
     };
     animate();
 
-    // store refs
+    // Store refs
     rendererRef.current = renderer;
     sceneRef.current = scene;
     cameraRef.current = camera;
@@ -215,11 +219,12 @@ function ShowroomThree() {
       window.removeEventListener("resize", onResize);
       controls.dispose();
       renderer.dispose();
-      // dispose geometries/materials
+
       mesh.geometry?.dispose();
       mesh.material?.dispose();
       floor.geometry?.dispose();
       floorMat.dispose();
+
       if (renderer.domElement.parentNode) {
         renderer.domElement.parentNode.removeChild(renderer.domElement);
       }
@@ -297,6 +302,7 @@ function ShowroomThree() {
     </section>
   );
 }
+
 
 
 /* ----------------- App ----------------- */
