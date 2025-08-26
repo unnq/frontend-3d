@@ -120,53 +120,66 @@ function ShowroomThree() {
   const sceneRef = useRef(null);
   const cameraRef = useRef(null);
   const meshRef = useRef(null);
-  const clockRef = useRef(null);
+  const controlsRef = useRef(null);
   const rafRef = useRef(null);
+
+  // keep latest speed visible to the animation loop
+  const speedRef = useRef(speed);
+  useEffect(() => { speedRef.current = speed; }, [speed]);
 
   // Init Three once
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
 
-    // Sizes from container
     const width = mount.clientWidth;
     const height = mount.clientHeight || 380;
 
-    // Scene
+    // Scene + subtle fog to give depth
     const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x0a0e14, 6, 14);
 
     // Camera
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
-    camera.position.set(0, 1.2, 3);
-    camera.lookAt(0, 1, 0);
+    camera.position.set(2.6, 1.8, 3.2);
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height);
+    renderer.shadowMap.enabled = true;
     mount.appendChild(renderer.domElement);
 
-    // Lights
-    const amb = new THREE.AmbientLight(0xffffff, 0.6);
+    // Lights (soft, slightly cinematic)
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x0a0e14, 0.7);
     const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-    dir.position.set(2, 4, 1);
-    scene.add(amb, dir);
+    dir.position.set(3, 5, 2);
+    dir.castShadow = true;
+    dir.shadow.mapSize.set(1024, 1024);
+    scene.add(hemi, dir);
 
-    // Floor (dark plane)
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x0a0e14, roughness: 1 });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), floorMat);
+    // Floor (receives shadow, slightly rough)
+    const floorMat = new THREE.MeshStandardMaterial({ color: 0x0a0e14, roughness: 0.95, metalness: 0.0 });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMat);
     floor.rotation.x = -Math.PI / 2;
+    floor.position.y = 0;
+    floor.receiveShadow = true;
     scene.add(floor);
 
-    // Mesh (created below in separate effect as shape/color change)
-    meshRef.current = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-    meshRef.current.position.set(0, 1, 0);
-    scene.add(meshRef.current);
+    // Mesh (default, updated by effects below)
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.3 });
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat);
+    mesh.position.set(0, 1, 0);
+    mesh.castShadow = true;
+    scene.add(mesh);
 
-    // Animation clock
-    const clock = new THREE.Clock();
-    clockRef.current = clock;
+    // OrbitControls (mouse/touch to orbit)
+    const controls = new window.THREE_OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;  // inertia feel
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 1, 0);
 
+    // Resize
     const onResize = () => {
       const w = mount.clientWidth;
       const h = mount.clientHeight || 380;
@@ -174,16 +187,17 @@ function ShowroomThree() {
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     };
-    window.addEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
 
+    // Animate
     const animate = () => {
       rafRef.current = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
 
-      // seconds per full rotation (speed) -> radians per second
-      const radiansPerSec = (2 * Math.PI) / Math.max(0.0001, speed);
-      if (meshRef.current) meshRef.current.rotation.y += radiansPerSec * delta;
+      // radians per second = full turn (2π) / seconds per rotation
+      const rps = (2 * Math.PI) / Math.max(0.0001, speedRef.current);
+      mesh.rotation.y += rps * (renderer.info.render.frame ? 1/60 : 1/60); // baseline tick; controls.update handles timing feel
 
+      controls.update();
       renderer.render(scene, camera);
     };
     animate();
@@ -192,24 +206,23 @@ function ShowroomThree() {
     rendererRef.current = renderer;
     sceneRef.current = scene;
     cameraRef.current = camera;
+    meshRef.current = mesh;
+    controlsRef.current = controls;
 
     // Cleanup
     return () => {
       cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('resize', onResize);
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
-        if (rendererRef.current.domElement && rendererRef.current.domElement.parentNode) {
-          rendererRef.current.domElement.parentNode.removeChild(rendererRef.current.domElement);
-        }
-      }
-      if (meshRef.current) {
-        meshRef.current.geometry?.dispose();
-        meshRef.current.material?.dispose();
-      }
+      window.removeEventListener("resize", onResize);
+      controls.dispose();
+      renderer.dispose();
+      // dispose geometries/materials
+      mesh.geometry?.dispose();
+      mesh.material?.dispose();
       floor.geometry?.dispose();
       floorMat.dispose();
-      // scene objects will be GC'd after renderer disposal
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
     };
   }, []); // init once
 
@@ -217,15 +230,12 @@ function ShowroomThree() {
   useEffect(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
-
-    // dispose old geometry
     mesh.geometry?.dispose();
 
-    // create new geometry
     if (shape === "sphere") {
-      mesh.geometry = new THREE.SphereGeometry(0.75, 32, 32);
+      mesh.geometry = new THREE.SphereGeometry(0.75, 48, 48);
     } else if (shape === "torus") {
-      mesh.geometry = new THREE.TorusGeometry(1, 0.16, 16, 100);
+      mesh.geometry = new THREE.TorusGeometry(1, 0.16, 24, 120);
     } else {
       mesh.geometry = new THREE.BoxGeometry(1, 1, 1);
     }
@@ -287,6 +297,7 @@ function ShowroomThree() {
     </section>
   );
 }
+
 
 /* ----------------- App ----------------- */
 function App() {
