@@ -111,37 +111,31 @@ function ShowroomAFrame() {
 
 /* ----------------- Three.js Showroom ----------------- */
 function ShowroomThree() {
-  const [shape, setShape] = useState("box"); // "box" | "sphere" | "torus"
-  const [hue, setHue] = useState(200);       // 0–360
-  const [speed, setSpeed] = useState(2);     // seconds per full rotation
+  const [shape, setShape] = React.useState("box");   // "box" | "sphere" | "torus"
+  const [hue, setHue] = React.useState(200);         // 0–360
+  const [speed, setSpeed] = React.useState(2);       // seconds per full rotation
 
-  const mountRef = useRef(null);
-  const rendererRef = useRef(null);
-  const sceneRef = useRef(null);
-  const cameraRef = useRef(null);
-  const meshRef = useRef(null);
-  const controlsRef = useRef(null);
-  const rafRef = useRef(null);
-  const clockRef = useRef(null);
+  const mountRef = React.useRef(null);
+  const meshRef  = React.useRef(null);
+  const rafRef   = React.useRef(null);
+  const speedRef = React.useRef(speed);
+  React.useEffect(() => { speedRef.current = speed; }, [speed]);
 
-  // keep latest speed available to the animate loop
-  const speedRef = useRef(speed);
-  useEffect(() => { speedRef.current = speed; }, [speed]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
 
     const width = mount.clientWidth;
     const height = mount.clientHeight || 380;
 
-    // Scene + subtle fog for depth
+    // Scene with subtle depth
     const scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x0a0e14, 6, 14);
 
-    // Camera
+    // Fixed camera (no orbit)
     const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
     camera.position.set(2.6, 1.8, 3.2);
+    camera.lookAt(0, 1, 0);
 
     // Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -152,7 +146,7 @@ function ShowroomThree() {
 
     // Lights
     const hemi = new THREE.HemisphereLight(0xffffff, 0x0a0e14, 0.7);
-    const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+    const dir  = new THREE.DirectionalLight(0xffffff, 0.9);
     dir.position.set(3, 5, 2);
     dir.castShadow = true;
     dir.shadow.mapSize.set(1024, 1024);
@@ -160,28 +154,18 @@ function ShowroomThree() {
 
     // Floor
     const floorMat = new THREE.MeshStandardMaterial({ color: 0x0a0e14, roughness: 0.95, metalness: 0.0 });
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMat);
+    const floor    = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = 0;
     floor.receiveShadow = true;
     scene.add(floor);
 
-    // Mesh (updated by effects below)
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.3 });
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat);
+    // Mesh (geometry can change later)
+    const material = new THREE.MeshStandardMaterial({ color: new THREE.Color(hslToHex(hue, 70, 55)), metalness: 0.2, roughness: 0.3 });
+    const mesh     = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
     mesh.position.set(0, 1, 0);
     mesh.castShadow = true;
     scene.add(mesh);
-
-    // OrbitControls (UMD build exposes THREE.OrbitControls)
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.target.set(0, 1, 0);
-
-    // Clock for correct delta timing
-    const clock = new THREE.Clock();
-    clockRef.current = clock;
+    meshRef.current = mesh;
 
     // Resize
     const onResize = () => {
@@ -193,50 +177,35 @@ function ShowroomThree() {
     };
     window.addEventListener("resize", onResize);
 
-    // Animate
+    // Animate (delta-based for live speed changes)
+    const clock = new THREE.Clock();
     const animate = () => {
       rafRef.current = requestAnimationFrame(animate);
-
-      const delta = clock.getDelta(); // seconds since last frame
+      const dt = clock.getDelta();
       const radiansPerSec = (2 * Math.PI) / Math.max(0.0001, speedRef.current);
-      mesh.rotation.y += radiansPerSec * delta;
-
-      controls.update();
+      mesh.rotation.y += radiansPerSec * dt;
       renderer.render(scene, camera);
     };
     animate();
-
-    // Store refs
-    rendererRef.current = renderer;
-    sceneRef.current = scene;
-    cameraRef.current = camera;
-    meshRef.current = mesh;
-    controlsRef.current = controls;
 
     // Cleanup
     return () => {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", onResize);
-      controls.dispose();
       renderer.dispose();
-
+      if (renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
       mesh.geometry?.dispose();
-      mesh.material?.dispose();
+      material.dispose();
       floor.geometry?.dispose();
       floorMat.dispose();
-
-      if (renderer.domElement.parentNode) {
-        renderer.domElement.parentNode.removeChild(renderer.domElement);
-      }
     };
   }, []); // init once
 
-  // Update geometry when shape changes
-  useEffect(() => {
+  // Update geometry on shape change
+  React.useEffect(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
-    mesh.geometry?.dispose();
-
+    const old = mesh.geometry;
     if (shape === "sphere") {
       mesh.geometry = new THREE.SphereGeometry(0.75, 48, 48);
     } else if (shape === "torus") {
@@ -244,16 +213,14 @@ function ShowroomThree() {
     } else {
       mesh.geometry = new THREE.BoxGeometry(1, 1, 1);
     }
+    old?.dispose();
   }, [shape]);
 
-  // Update color when hue changes
-  useEffect(() => {
+  // Update color on hue change
+  React.useEffect(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
-    const hex = hslToHex(hue, 70, 55);
-    mesh.material.color.set(hex);
-    mesh.material.metalness = 0.2;
-    mesh.material.roughness = 0.3;
+    mesh.material.color.set(hslToHex(hue, 70, 55));
   }, [hue]);
 
   return (
@@ -302,6 +269,7 @@ function ShowroomThree() {
     </section>
   );
 }
+
 
 
 
