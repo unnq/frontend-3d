@@ -141,6 +141,33 @@ body {
 .label { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
 input[type="range"] { width: 100%; accent-color: #7c4dff; background: transparent; }
 
+/* simple grid + cards */
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)), var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+/* form controls to match your style */
+.input, .select {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--btn-radius);
+  padding: 10px 12px;
+  font-size: 14px;
+}
+.input { min-width: 200px; }
+.input::placeholder { color: var(--muted); }
+.input:focus, .select:focus { outline: none; border-color: #7c4dff; }
+
+
 /* Animated gradient used by the chromatic button */
 @keyframes chromaShift {
   0%   { background-position:   0% 50%; }
