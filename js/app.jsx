@@ -15,12 +15,12 @@ function Hero() {
   return (
     <section className="hero">
       <div className="container">
-        <h1 className="hero-title">Your Hero Title Goes Here</h1>
-        <p className="hero-subtitle">Simple placeholder line of hero subtitle text.</p>
+        <h1 className="hero-title">demosite</h1>
+        <p className="hero-subtitle">this is a test site, check it out.</p>
 
         <div className="hero-actions">
-          <button className="btn btn-chromatic">Button A</button>
-          <button className="btn btn-white">Button B</button>
+          <button className="btn btn-chromatic">Chromatic</button>
+          <button className="btn btn-white">Plain</button>
         </div>
       </div>
     </section>
