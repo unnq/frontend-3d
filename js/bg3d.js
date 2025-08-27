@@ -21,10 +21,10 @@ const lookTmp     = new THREE.Vector3();
 // Define X positions along the wall for each section (edit to taste)
 const railX = {
   start:    0.0,
-  missions: 4.0,
-  worlds:   8.0,
   model:    2.8,   // default bay for Model Selector
-  settings: 12.0,
+  missions: 8.0,
+  worlds:   13.0, 
+  settings: 18.0,
 };
 
 const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
@@ -86,7 +86,7 @@ envLoader.load(
 
 // Model anchor (fixed in world) + inner spin pivot (we rotate this)
 const modelGroup = new THREE.Group();
-const modelDistance = 2; // how far in front of the wall the model sits
+const modelDistance = 4; // how far in front of the wall the model sits
 modelGroup.position.set(railX.model, 0.9, wallZ + modelDistance);
 scene.add(modelGroup);
 
