@@ -87,7 +87,7 @@ envLoader.load(
 // Model anchor (fixed in world) + inner spin pivot (we rotate this)
 const modelGroup = new THREE.Group();
 const modelDistance = 4; // how far in front of the wall the model sits
-modelGroup.position.set(railX.model, 0.9, wallZ + modelDistance);
+modelGroup.position.set(railX.model, 1.2, wallZ + modelDistance);
 scene.add(modelGroup);
 
 const spin = new THREE.Group();
