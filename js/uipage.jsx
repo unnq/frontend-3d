@@ -13,7 +13,7 @@ function SideMenu({ active, onSelect, onToggleModelMenu, showModelMenu, onPickMo
     { key: "exit",     label: "Exit" },
   ];
 
-  // Placeholder models — update these filenames to your real files
+  // my models
   const MODEL_OPTIONS = [
     { key: "modelA", label: "Model A", url: "assets/models/bmw_m3_gtr_-_psx_style_mw_2012_java.glb" },
     { key: "modelB", label: "Model B", url: "assets/models/macbook_psx_style.glb" },
