@@ -65,7 +65,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-left: 15vw;
+  margin-left: 5vw;
+  margin-top: 5vh;
 
   /* NO background, NO borders, NO blur */
   background: transparent;
