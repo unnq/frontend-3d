@@ -186,7 +186,10 @@ function HUD() {
   modelGroup.add(placeholder);
 
   // Loader
-  const loader = new THREE.GLTFLoader();
+if (!THREE.GLTFLoader) {
+  console.error("GLTFLoader not found. Check script order/CDN URL.");
+} 
+const loader = new THREE.GLTFLoader();
 
   // Helpers
   function disposeObject(root){
