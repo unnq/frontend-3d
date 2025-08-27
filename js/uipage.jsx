@@ -15,7 +15,7 @@ function SideMenu({ active, onSelect, onToggleModelMenu, showModelMenu, onPickMo
   const MODEL_OPTIONS = [
     { key: "modelA", label: "Model A", url: "assets/models/bmw_m3_gtr_-_psx_style_mw_2012_java.glb" },
     { key: "modelB", label: "Model B", url: "assets/models/macbook_psx_style.glb" },
-    { key: "modelC", label: "Model C", url: "assets/models/sonyradio.glb" },
+    { key: "modelC", label: "Model C", url: "assets/models/psx_box_of_cheez_it_crackers.glb" },
   ];
 
   return (
