@@ -68,7 +68,7 @@ envLoader.load(
 
 // Model anchor (fixed in world) + inner spin pivot (we rotate this)
 const modelGroup = new THREE.Group();
-modelGroup.position.set(1.4, 0.9, 0);
+modelGroup.position.set(2.8, 1.6, -2);
 scene.add(modelGroup);
 
 const spin = new THREE.Group();
