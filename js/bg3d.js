@@ -1,8 +1,8 @@
-// ESM imports (like your other project)
+// bg3d.js — ESM Three.js scene with robust centering & uniform scaling
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-// (Optional later) import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
+// Mount
 const mount = document.getElementById('bg3d');
 const width = mount.clientWidth;
 const height = mount.clientHeight;
@@ -36,79 +36,91 @@ ground.rotation.x = -Math.PI / 2;
 ground.position.y = -0.2;
 scene.add(ground);
 
-// Model pivot
+// Model anchor (fixed in world) + inner spin pivot (we rotate this)
 const modelGroup = new THREE.Group();
 modelGroup.position.set(1.4, 0.9, 0);
 scene.add(modelGroup);
 
-// Placeholder low-poly
+const spin = new THREE.Group();
+modelGroup.add(spin);
+
+// Placeholder (low-poly) so there's something before first load
 const placeholderMat = new THREE.MeshStandardMaterial({
   color: 0x7c4dff, metalness: 0.15, roughness: 0.4, flatShading: true
 });
 const placeholder = new THREE.Mesh(new THREE.IcosahedronGeometry(1.1, 0), placeholderMat);
-modelGroup.add(placeholder);
+spin.add(placeholder);
 
 // Loader
 const loader = new GLTFLoader();
 
-// Helpers
+// Utils
 function disposeObject(root){
   root.traverse((obj) => {
     if (obj.isMesh) {
-      obj.geometry?.dispose?.();
+      obj.geometry && obj.geometry.dispose && obj.geometry.dispose();
       const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
       mats.filter(Boolean).forEach(m => {
         for (const k in m) {
           const v = m[k];
-          if (v && v.isTexture) v.dispose?.();
+          if (v && v.isTexture && v.dispose) v.dispose();
         }
-        m.dispose?.();
+        m.dispose && m.dispose();
       });
     }
   });
 }
-function clearModelGroup(){
-  while (modelGroup.children.length) {
-    const child = modelGroup.children.pop();
-    modelGroup.remove(child);
+
+function clearSpin(){
+  while (spin.children.length) {
+    const child = spin.children.pop();
+    spin.remove(child);
     disposeObject(child);
   }
 }
-function fitAndCenter(object3D) {
-  // 1) compute size to get a uniform scale
+
+// Normalize any loaded model to a consistent on-screen size
+// and center its local pivot so it rotates in place (not orbit)
+function normalizeModel(object3D) {
+  // Add first so parent transforms are stable while measuring
+  if (object3D.parent !== spin) spin.add(object3D);
+
+  // 1) initial bounds
   object3D.updateWorldMatrix(true, false);
-  const box1 = new THREE.Box3().setFromObject(object3D);
-  const size1 = box1.getSize(new THREE.Vector3());
-  const maxDim = Math.max(size1.x, size1.y, size1.z) || 1;
-  const target = 1.8; // tweak for your scene
-  const scale = target / maxDim;
+  const box = new THREE.Box3().setFromObject(object3D);
+  const sphere = new THREE.Sphere();
+  box.getBoundingSphere(sphere);
+
+  if (!isFinite(sphere.radius) || sphere.radius === 0) return;
+
+  // 2) scale to target radius
+  const targetRadius = 0.9; // adjust larger/smaller look
+  const scale = targetRadius / sphere.radius;
   object3D.scale.setScalar(scale);
 
-  // 2) after scaling, center pivot in LOCAL space
+  // 3) recalc bounds after scaling, then center in LOCAL space
   object3D.updateWorldMatrix(true, false);
-  const box2 = new THREE.Box3().setFromObject(object3D);
-  const worldCenter = box2.getCenter(new THREE.Vector3());
-  // convert world center to the model's local coords
-  const localCenter = object3D.worldToLocal(worldCenter.clone());
+  box.setFromObject(object3D).getBoundingSphere(sphere);
+  const localCenter = object3D.worldToLocal(sphere.center.clone());
   object3D.position.sub(localCenter);
 
-  // optional: ensure no meshes cast/receive shadows unless you want them
+  // Optional: disable shadows for cleanliness
   object3D.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } });
 }
-
 
 let lastObjectURL = null;
 
 function setModelURL(url){
-  loader.load(url,
+  loader.load(
+    url,
     (gltf) => {
-      clearModelGroup();
-      const model = gltf.scene || gltf.scenes?.[0];
-      fitAndCenter(model);
-      modelGroup.add(model);
+      clearSpin();
+      const model = gltf.scene || (gltf.scenes && gltf.scenes[0]) || null;
+      if (!model) { console.warn('GLB has no scene'); return; }
+      normalizeModel(model);
     },
     undefined,
-    (err) => console.error("GLB load error:", err)
+    (err) => console.error('GLB load error:', err)
   );
 }
 
@@ -119,10 +131,10 @@ function loadFromFile(file){
   setModelURL(objURL);
 }
 
-// Expose a tiny API for the React UI
+// Expose API for React UI
 window.UIScene = { setModelURL, loadFromFile };
 
-// Handle resize
+// Resize
 function onResize(){
   const w = mount.clientWidth;
   const h = mount.clientHeight;
@@ -132,12 +144,12 @@ function onResize(){
 }
 window.addEventListener('resize', onResize);
 
-// Animate
+// Animate (rotate inner pivot so each model spins around its own center)
 const clock = new THREE.Clock();
 function animate(){
   requestAnimationFrame(animate);
   const dt = clock.getDelta();
-  modelGroup.rotation.y += (2 * Math.PI / 8) * dt; // ~8s per rotation
+  spin.rotation.y += (2 * Math.PI / 8) * dt; // ~8s per full turn
   renderer.render(scene, camera);
 }
 animate();
