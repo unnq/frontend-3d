@@ -28,6 +28,7 @@ function SideMenu({ active, onSelect, onToggleModelMenu, showModelMenu, onPickMo
             <button
               className={`menu-item ${active === it.key ? "is-active" : ""}`}
               onClick={() => {
+                if (it.key === "exit") { window.location.href = "./index.html"; return; } // go home
                 if (it.key === "model") onToggleModelMenu();
                 else onSelect(it.key);
               }}
