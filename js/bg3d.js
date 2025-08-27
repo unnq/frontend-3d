@@ -1,4 +1,4 @@
-// bg3d.js — ESM Three.js scene with robust centering & uniform scaling
+// bg3d.js — ESM Three.js scene with simple wall-relative camera rail
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -11,10 +11,32 @@ const height = mount.clientHeight;
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x0d0d0f, 12, 26);
 
-// Camera
+// ---- Camera (wall-relative, no yaw if X matches) ----
+const wallZ       = -8;   // <— set this manually; tweak anytime
+const camHeight   = 1.6;  // camera Y
+const camDistance = 10;   // distance in front of the wall (z = wallZ + camDistance)
+const focusY      = 1.2;  // where on the wall to look
+const lookTmp     = new THREE.Vector3();
+
+// Define X positions along the wall for each section (edit to taste)
+const railX = {
+  start:    0.0,
+  missions: 4.0,
+  worlds:   8.0,
+  model:    2.8,   // default bay for Model Selector
+  settings: 12.0,
+};
+
 const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
-camera.position.set(2.8, 1.6, 2.0);
-camera.lookAt(2.8, 1.2, 0.0);
+
+function faceWall() {
+  lookTmp.set(camera.position.x, focusY, wallZ);
+  camera.lookAt(lookTmp); // same X as camera => no yaw
+}
+
+// Start at the Model Selector bay
+camera.position.set(railX.model, camHeight, wallZ + camDistance);
+faceWall();
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -29,7 +51,7 @@ const dir  = new THREE.DirectionalLight(0xffffff, 0.9);
 dir.position.set(2.5, 4.0, 1.5);
 scene.add(hemi, dir);
 
-// Ground
+// Ground (leave as-is; comment out scene.add if you don't want it)
 const gMat = new THREE.MeshStandardMaterial({ color: 0x0a0e14, roughness: 1 });
 const ground = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), gMat);
 ground.rotation.x = -Math.PI / 2;
@@ -46,7 +68,6 @@ envLoader.load(
     environment = gltf.scene || (gltf.scenes && gltf.scenes[0]);
     if (!environment) { console.warn('walltest.glb has no scene'); return; }
 
-    // Make sure you can see front/back faces while testing
     environment.traverse(o => {
       if (o.isMesh && o.material) {
         const mats = Array.isArray(o.material) ? o.material : [o.material];
@@ -54,21 +75,19 @@ envLoader.load(
       }
     });
 
-    // Position/orientation (tweak if your wall faces the wrong way)
     environment.position.set(0, 0, 0);
-    // environment.rotation.y = Math.PI; // <- uncomment to flip 180° if needed
-    // environment.scale.setScalar(1);   // <- bump if you exported small
-
+    // environment.rotation.y = Math.PI; // flip if needed
+    // environment.scale.setScalar(1);
     scene.add(environment);
   },
   undefined,
   (err) => console.error('Env load error:', err)
 );
 
-
 // Model anchor (fixed in world) + inner spin pivot (we rotate this)
 const modelGroup = new THREE.Group();
-modelGroup.position.set(2.8, 1.6, -2);
+const modelDistance = 2; // how far in front of the wall the model sits
+modelGroup.position.set(railX.model, 0.9, wallZ + modelDistance);
 scene.add(modelGroup);
 
 const spin = new THREE.Group();
@@ -112,10 +131,8 @@ function clearSpin(){
 // Normalize any loaded model to a consistent on-screen size
 // and center its local pivot so it rotates in place (not orbit)
 function normalizeModel(object3D) {
-  // Add first so parent transforms are stable while measuring
   if (object3D.parent !== spin) spin.add(object3D);
 
-  // 1) initial bounds
   object3D.updateWorldMatrix(true, false);
   const box = new THREE.Box3().setFromObject(object3D);
   const sphere = new THREE.Sphere();
@@ -123,18 +140,15 @@ function normalizeModel(object3D) {
 
   if (!isFinite(sphere.radius) || sphere.radius === 0) return;
 
-  // 2) scale to target radius
-  const targetRadius = 0.9; // adjust larger/smaller look
+  const targetRadius = 0.9;
   const scale = targetRadius / sphere.radius;
   object3D.scale.setScalar(scale);
 
-  // 3) recalc bounds after scaling, then center in LOCAL space
   object3D.updateWorldMatrix(true, false);
   box.setFromObject(object3D).getBoundingSphere(sphere);
   const localCenter = object3D.worldToLocal(sphere.center.clone());
   object3D.position.sub(localCenter);
 
-  // Optional: disable shadows for cleanliness
   object3D.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } });
 }
 
@@ -161,8 +175,26 @@ function loadFromFile(file){
   setModelURL(objURL);
 }
 
+// ---- Simple camera tween along the wall (X only) ----
+function easeInOutQuad(t){ return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2; }
+let camTween = null; // {from,to,start,dur}
+
+function moveCameraToX(targetX, duration=900){
+  camTween = { from: camera.position.x, to: targetX, start: performance.now(), dur: duration };
+}
+
+function moveTo(sectionOrX, duration=900){
+  const x = (typeof sectionOrX === 'number') ? sectionOrX : railX[sectionOrX];
+  if (x == null) return;
+  moveCameraToX(x, duration);
+}
+
 // Expose API for React UI
-window.UIScene = { setModelURL, loadFromFile };
+window.UIScene = Object.assign(window.UIScene || {}, {
+  setModelURL,
+  loadFromFile,
+  moveTo,
+});
 
 // Resize
 function onResize(){
@@ -174,11 +206,21 @@ function onResize(){
 }
 window.addEventListener('resize', onResize);
 
-// Animate (rotate inner pivot so each model spins around its own center)
+// Animate (rotate inner pivot + apply camera tween)
 const clock = new THREE.Clock();
 function animate(){
   requestAnimationFrame(animate);
   const dt = clock.getDelta();
+
+  // apply camera tween if active
+  if (camTween){
+    const t = Math.min(1, (performance.now() - camTween.start) / camTween.dur);
+    const e = easeInOutQuad(t);
+    camera.position.x = camTween.from + (camTween.to - camTween.from) * e;
+    faceWall(); // keep perpendicular to wall
+    if (t >= 1) camTween = null;
+  }
+
   spin.rotation.y += (2 * Math.PI / 8) * dt; // ~8s per full turn
   renderer.render(scene, camera);
 }
