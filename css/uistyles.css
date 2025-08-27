@@ -8,7 +8,7 @@
   --accent: #7c4dff;        /* neon-ish purple */
   --border: #2a2a2f;
 
-  --menu-width: 260px;      /* layout only; no visible pane */
+  --menu-width: 260px;      /* layout column width */
 }
 
 * { box-sizing: border-box; }
@@ -69,6 +69,11 @@ body {
   /* NO background, NO borders, NO blur */
   background: transparent;
   border: none;
+
+  /* Prevent tiny horizontal scroll */
+  width: var(--menu-width);
+  max-width: var(--menu-width);
+  overflow-x: hidden;
 }
 
 /* Title: text-only, slight glow for readability */
@@ -88,7 +93,8 @@ body {
   list-style: none;
   margin: 0;
   padding: 8px 4px 0 4px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden; /* stop sideways overflow */
 }
 
 /* Text-only “buttons” (actual <button> elements) */
@@ -106,10 +112,11 @@ body {
   text-align: left;
   cursor: pointer;
 
-  padding: 6px 8px;         /* hit area without a box feel */
-  margin: 2px 6px;
-  border-radius: 6px;        /* invisible unless you add a focus ring */
+  padding: 6px 8px;      /* hit area without a box feel */
+  margin: 2px 0;         /* no side margins to avoid overflow */
+  border-radius: 6px;    /* invisible unless focus ring added */
   width: 100%;
+  display: block;
 
   /* subtle readability against any scene */
   text-shadow: 0 1px 0 rgba(0,0,0,0.25), 0 0 6px rgba(0,0,0,0.35);
@@ -120,11 +127,11 @@ body {
     text-shadow .15s ease;
 }
 
-/* Hover/focus: neon tint + tiny nudge */
+/* Hover/focus: neon tint + tiny nudge (kept minimal to avoid overflow) */
 .menu-item:hover,
 .menu-item:focus-visible {
   color: var(--accent);
-  transform: translateX(2px);
+  transform: translateX(1px);
   outline: none;
   text-shadow:
     0 0 10px rgba(124,77,255,0.55),
