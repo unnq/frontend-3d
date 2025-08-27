@@ -157,6 +157,42 @@ body {
   text-shadow: 0 0 6px rgba(0,0,0,0.35);
 }
 
+/* Seamless text-only submenu for Model Selector */
+.menu-sub {
+  list-style: none;
+  margin: 4px 0 0 12px;  /* slight indent under "Model Selector" */
+  padding: 0;
+}
+
+.menu-item-sub {
+  background: transparent;
+  border: none;
+  appearance: none;
+  font-family: "Space Mono", monospace;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+
+  padding: 4px 6px;
+  margin: 2px 0;
+  width: 100%;
+  display: block;
+
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25), 0 0 6px rgba(0,0,0,0.35);
+  transition: color .15s ease, transform .06s ease, text-shadow .15s ease;
+}
+
+.menu-item-sub:hover,
+.menu-item-sub:focus-visible {
+  color: var(--accent);
+  transform: translateX(1px);
+  outline: none;
+  text-shadow: 0 0 10px rgba(124,77,255,0.55), 0 1px 0 rgba(0,0,0,0.25);
+}
+
+
 /* Right column placeholder for future HUD elements */
 .hud-right {
   pointer-events: none; /* keep canvas interactive */
