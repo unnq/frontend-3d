@@ -15,9 +15,9 @@ function SideMenu({ active, onSelect, onToggleModelMenu, showModelMenu, onPickMo
 
   // Placeholder models — update these filenames to your real files
   const MODEL_OPTIONS = [
-    { key: "modelA", label: "Model A", url: "assets/models/modelA.glb" },
-    { key: "modelB", label: "Model B", url: "assets/models/modelB.glb" },
-    { key: "modelC", label: "Model C", url: "assets/models/modelC.glb" },
+    { key: "modelA", label: "Model A", url: "assets/models/bmw_m3_gtr_-_psx_style_mw_2012_java.glb" },
+    { key: "modelB", label: "Model B", url: "assets/models/macbook_psx_style.glb" },
+    { key: "modelC", label: "Model C", url: "assets/models/sonyradio.glb" },
   ];
 
   return (
