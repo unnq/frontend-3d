@@ -36,6 +36,36 @@ ground.rotation.x = -Math.PI / 2;
 ground.position.y = -0.2;
 scene.add(ground);
 
+// --- Environment (your Blender wall) ---
+const envLoader = new GLTFLoader();
+let environment = null;
+
+envLoader.load(
+  'assets/models/walltest.glb',
+  (gltf) => {
+    environment = gltf.scene || (gltf.scenes && gltf.scenes[0]);
+    if (!environment) { console.warn('walltest.glb has no scene'); return; }
+
+    // Make sure you can see front/back faces while testing
+    environment.traverse(o => {
+      if (o.isMesh && o.material) {
+        const mats = Array.isArray(o.material) ? o.material : [o.material];
+        mats.forEach(m => { if (m.side !== THREE.DoubleSide) m.side = THREE.DoubleSide; });
+      }
+    });
+
+    // Position/orientation (tweak if your wall faces the wrong way)
+    environment.position.set(0, 0, 0);
+    // environment.rotation.y = Math.PI; // <- uncomment to flip 180° if needed
+    // environment.scale.setScalar(1);   // <- bump if you exported small
+
+    scene.add(environment);
+  },
+  undefined,
+  (err) => console.error('Env load error:', err)
+);
+
+
 // Model anchor (fixed in world) + inner spin pivot (we rotate this)
 const modelGroup = new THREE.Group();
 modelGroup.position.set(1.4, 0.9, 0);
