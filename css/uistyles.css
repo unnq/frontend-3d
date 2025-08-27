@@ -1,17 +1,14 @@
 /* =========================
-   Theme & Base
+   Video Game UI — Transparent HUD
    ========================= */
 :root{
-  --bg: #0d0d0f;         /* near-black (not pure) */
+  --bg: #0d0d0f;            /* near-black page fallback */
   --text: #ffffff;
   --muted: #bfbfbf;
-  --accent: #7c4dff;     /* purple accent */
-  --accent-soft: rgba(124,77,255,0.25);
+  --accent: #7c4dff;        /* neon-ish purple */
   --border: #2a2a2f;
-  --panel: #121215;
 
-  --menu-width: 260px;
-  --menu-radius: 12px;
+  --menu-width: 260px;      /* layout only; no visible pane */
 }
 
 * { box-sizing: border-box; }
@@ -27,15 +24,13 @@ body {
 }
 
 /* =========================
-   Background 3D Canvas
+   Fullscreen Three.js Canvas
    ========================= */
 #bg3d {
   position: fixed;
-  inset: 0;             /* top:0; right:0; bottom:0; left:0 */
+  inset: 0;
   z-index: 0;
 }
-
-/* Make sure the renderer canvas fills fully */
 #bg3d canvas {
   display: block;
   width: 100%;
@@ -43,130 +38,122 @@ body {
 }
 
 /* =========================
-   HUD / Overlay
+   HUD / Overlay (transparent)
    ========================= */
 #ui-root {
   position: relative;
-  z-index: 10;          /* above canvas */
+  z-index: 10;   /* above canvas */
   width: 100%;
   height: 100%;
 }
 
-/* Side menu container (left rail) */
+/* Grid just reserves space for the left list; no visual panel */
 .hud {
   position: absolute;
   inset: 0;
   display: grid;
   grid-template-columns: var(--menu-width) 1fr;
   align-items: stretch;
-  gap: 0;
-  pointer-events: none; /* allow clicks to pass through by default */
+  pointer-events: none; /* pass-through by default */
 }
 
-/* The menu itself accepts pointer events */
+/* Side menu accepts clicks; totally transparent */
 .side-menu {
   pointer-events: auto;
   height: 100%;
-  padding: 20px 16px;
+  padding: 24px 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 
-  /* Slightly transparent panel to feel like a game HUD */
-  background: linear-gradient(180deg, rgba(18,18,21,0.92), rgba(18,18,21,0.85));
-  border-right: 1px solid var(--border);
-  backdrop-filter: blur(6px);
+  /* NO background, NO borders, NO blur */
+  background: transparent;
+  border: none;
 }
 
-/* Menu title / logo */
+/* Title: text-only, slight glow for readability */
 .menu-title {
   font-family: "Space Mono", monospace;
   font-weight: 700;
   font-size: 18px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin: 6px 6px 14px 6px;
+  margin: 4px 6px 10px 6px;
   color: var(--text);
-  opacity: 0.9;
+  text-shadow: 0 0 6px rgba(0,0,0,0.45);
 }
 
-/* Menu list */
+/* Vertical list — plain text on top of the scene */
 .menu-list {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 8px 4px 0 4px;
   overflow: auto;
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
 }
 
-/* Individual item */
+/* Text-only “buttons” (actual <button> elements) */
 .menu-item {
-  font-family: "Space Mono", monospace; /* retro mono vibe */
-  font-size: 15px;
-  letter-spacing: 0.06em;
+  /* remove any default button chrome */
+  background: transparent;
+  border: none;
+  appearance: none;
+
+  font-family: "Space Mono", monospace; /* retro vibe */
+  font-size: 16px;
+  letter-spacing: 0.08em;
   color: var(--text);
   text-decoration: none;
+  text-align: left;
+  cursor: pointer;
 
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  padding: 6px 8px;         /* hit area without a box feel */
+  margin: 2px 6px;
+  border-radius: 6px;        /* invisible unless you add a focus ring */
+  width: 100%;
 
-  padding: 12px 12px;
-  margin: 2px 4px;
-  border-radius: 10px;
+  /* subtle readability against any scene */
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25), 0 0 6px rgba(0,0,0,0.35);
 
-  position: relative;
-  transition: background .15s ease, transform .05s ease, color .15s ease;
-  border: 1px solid transparent;
+  transition:
+    color .15s ease,
+    transform .06s ease,
+    text-shadow .15s ease;
 }
 
-/* Left accent bar (like PS1 UI highlight) */
-.menu-item::before {
-  content: "";
-  position: absolute;
-  left: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0px;
-  height: 60%;
-  background: var(--accent);
-  border-radius: 2px;
-  transition: width .15s ease, opacity .15s ease;
-  opacity: 0.6;
-}
-
-/* Hover / focus */
+/* Hover/focus: neon tint + tiny nudge */
 .menu-item:hover,
 .menu-item:focus-visible {
-  background: rgba(255,255,255,0.05);
-  border-color: var(--border);
+  color: var(--accent);
+  transform: translateX(2px);
   outline: none;
+  text-shadow:
+    0 0 10px rgba(124,77,255,0.55),
+    0 1px 0 rgba(0,0,0,0.25);
 }
-.menu-item:hover::before,
-.menu-item:focus-visible::before { width: 4px; }
 
-/* Active / selected */
+/* Active/selected: stronger glow; still text-only */
 .menu-item.is-active {
-  background: rgba(124,77,255,0.14);
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  color: var(--accent);
+  text-shadow:
+    0 0 12px rgba(124,77,255,0.7),
+    0 0 2px rgba(255,255,255,0.5),
+    0 1px 0 rgba(0,0,0,0.25);
 }
-.menu-item.is-active::before { width: 6px; }
 
-/* Optional small hint */
+/* Optional little hint text (also text-only) */
 .menu-hint {
   font-size: 12px;
   color: var(--muted);
-  margin: 8px 10px 0 10px;
+  margin: 10px 10px 0 10px;
+  text-shadow: 0 0 6px rgba(0,0,0,0.35);
 }
 
-/* Right side overlay area (kept empty for now, but ready) */
+/* Right column placeholder for future HUD elements */
 .hud-right {
-  pointer-events: none; /* so clicks still reach canvas unless you add UI later */
+  pointer-events: none; /* keep canvas interactive */
 }
 
-/* Small “helper” pill (e.g., controls) */
+/* Tiny helper pill — keep subtle & text-only feel */
 .helper-pill {
   position: absolute;
   bottom: 16px;
@@ -175,16 +162,16 @@ body {
   font-size: 12px;
   letter-spacing: 0.05em;
   color: var(--muted);
-  background: rgba(0,0,0,0.4);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 6px 10px;
+  background: transparent;          /* no chip background */
+  border: none;
+  padding: 0;
   pointer-events: none;
+  text-shadow: 0 0 6px rgba(0,0,0,0.45);
 }
 
-/* Safe mobile sizing */
+/* Mobile tweaks */
 @media (max-width: 760px) {
   :root { --menu-width: 210px; }
-  .menu-item { font-size: 14px; }
+  .menu-item { font-size: 15px; }
   .menu-title { font-size: 16px; }
 }
