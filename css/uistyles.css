@@ -8,7 +8,7 @@
   --accent: #7c4dff;        /* neon-ish purple */
   --border: #2a2a2f;
 
-  --menu-width: 260px;      /* layout column width */
+  --menu-width: 300px;      /* layout column width */
 }
 
 * { box-sizing: border-box; }
