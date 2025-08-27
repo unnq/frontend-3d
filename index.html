@@ -3,43 +3,34 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>uitest • demosite by Alter Ego Group</title>
-    <link rel="icon" href="data:,">
+    <title>demosite by Alter Ego Group</title>
 
-    <!-- Fonts -->
+    <!-- Fonts: Inter (variable) & Source Sans Pro -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Source+Sans+Pro:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-    <!-- Page styles -->
-    <link rel="stylesheet" href="./css/uistyles.css" />
+    <!-- Styles -->
+    <link rel="stylesheet" href="./css/styles.css" />
 
-    <!-- Import map for Three.js ESM + addons -->
-    <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/examples/jsm/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-    </script>
-  </head>
-  <body>
-    <!-- Background 3D canvas mount -->
-    <div id="bg3d"></div>
+    <!-- A-Frame (A-Frame modules) -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
-    <!-- React UI overlay -->
-    <div id="ui-root"></div>
+    <!-- Three.js (Three.js modules) -->
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 
-    <!-- Three.js background (ES module) -->
-    <script type="module" src="./js/bg3d.js"></script>
-
-    <!-- React (UMD) + Babel for JSX UI -->
+    <!-- React (no build) + Babel for JSX in-browser -->
     <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
 
-    <!-- UI (JSX compiled in-browser) -->
-    <script type="text/babel" data-presets="env,react" src="./js/uipage.jsx"></script>
+    <!-- Your React app -->
+    <script type="text/babel" data-presets="env,react" src="./js/app.jsx"></script>
   </body>
 </html>
