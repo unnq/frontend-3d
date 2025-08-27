@@ -75,20 +75,27 @@ function clearModelGroup(){
   }
 }
 function fitAndCenter(object3D) {
-  const box = new THREE.Box3().setFromObject(object3D);
-  const size = new THREE.Vector3();
-  const center = new THREE.Vector3();
-  box.getSize(size);
-  box.getCenter(center);
-
-  object3D.position.sub(center);
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const target = 1.8; // tweak if your models run big/small
-  const scale = target / (maxDim || 1);
+  // 1) compute size to get a uniform scale
+  object3D.updateWorldMatrix(true, false);
+  const box1 = new THREE.Box3().setFromObject(object3D);
+  const size1 = box1.getSize(new THREE.Vector3());
+  const maxDim = Math.max(size1.x, size1.y, size1.z) || 1;
+  const target = 1.8; // tweak for your scene
+  const scale = target / maxDim;
   object3D.scale.setScalar(scale);
 
+  // 2) after scaling, center pivot in LOCAL space
+  object3D.updateWorldMatrix(true, false);
+  const box2 = new THREE.Box3().setFromObject(object3D);
+  const worldCenter = box2.getCenter(new THREE.Vector3());
+  // convert world center to the model's local coords
+  const localCenter = object3D.worldToLocal(worldCenter.clone());
+  object3D.position.sub(localCenter);
+
+  // optional: ensure no meshes cast/receive shadows unless you want them
   object3D.traverse(o => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } });
 }
+
 
 let lastObjectURL = null;
 
