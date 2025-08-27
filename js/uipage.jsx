@@ -89,13 +89,21 @@ function HUD() {
   return (
     <div className="hud">
       <SideMenu
-        active={active}
-        onSelect={(k) => { setActive(k); setShowModelMenu(false); }}
-        onToggleModelMenu={() => { setActive("model"); setShowModelMenu(v => !v); }}
-        showModelMenu={showModelMenu}
-        onPickModel={pickModel}
-        onUploadClick={onUploadClick}
-      />
+  active={active}
+  onSelect={(k) => {
+    if (k !== "exit") window.UIScene?.moveTo(k);  // slide camera to that bay
+    setActive(k);
+    setShowModelMenu(false);
+  }}
+  onToggleModelMenu={() => {
+    window.UIScene?.moveTo("model");              // ensure we’re at the model bay
+    setActive("model");
+    setShowModelMenu(v => !v);
+  }}
+  showModelMenu={showModelMenu}
+  onPickModel={pickModel}
+  onUploadClick={onUploadClick}
+/>
       <div className="hud-right" />
       <input ref={setFileRef} type="file" accept=".glb,.gltf" style={{ display: "none" }} onChange={onFileChange} />
       <div className="helper-pill">Model Selector → choose or upload</div>
