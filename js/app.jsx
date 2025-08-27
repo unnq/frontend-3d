@@ -18,7 +18,7 @@ function Hero() {
         <h1 className="hero-title">demosite</h1>
         <p className="hero-subtitle">test environment for react and 3d elements.</p>
         <div className="hero-actions">
-          <a href="./uitest.html" className="btn btn-chromatic">Colorful</a>
+          <a href="./uitest.html" className="btn btn-chromatic">UI testpage</a>
           <button className="btn btn-white">Plain</button>
         </div>
       </div>
