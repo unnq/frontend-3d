@@ -364,6 +364,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  pointer-events: auto;
   z-index: 55;
   /* transparent, no panel */
 }
