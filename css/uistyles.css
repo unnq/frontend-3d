@@ -322,6 +322,68 @@ body {
   text-shadow: 0 0 6px rgba(0,0,0,0.45);
 }
 
+/* ===== Music overlay + mini-player ===== */
+
+/* Fullscreen overlay container (stays mounted; fades when closed) */
+.music-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 60; /* above HUD */
+  transition: opacity .2s ease, transform .2s ease;
+}
+.music-overlay.is-open { opacity: 1; pointer-events: auto; }
+.music-overlay.is-closed { opacity: 0; pointer-events: none; }
+
+/* Centered transparent panel */
+.music-panel {
+  width: min(720px, 92vw);
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  /* No background — fully seamless */
+}
+
+.music-back {
+  margin-right: auto;
+}
+
+/* Keep your existing styles working */
+.music-top { align-items: center; justify-content: space-between; }
+.player-box { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; }
+
+/* Mini-player bar (visible when overlay is closed) */
+.miniplayer {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  width: min(680px, 92vw);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 55;
+  /* transparent, no panel */
+}
+.mini-left {
+  font-family: "Space Mono", monospace;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 6px rgba(0,0,0,0.35);
+}
+.mini-controls { display: inline-flex; gap: 8px; align-items: center; }
+.mini-label { color: var(--muted); margin-right: 6px; }
+
+/* Mobile tweaks */
+@media (max-width: 520px) {
+  .music-panel { width: 92vw; }
+  .miniplayer { width: 94vw; }
+  .controls input[type="range"],
+  .mini-controls input[type="range"] { width: 120px; }
+}
+
+
 /* Mobile tweaks */
 @media (max-width: 760px) {
   :root { --menu-width: 210px; }
