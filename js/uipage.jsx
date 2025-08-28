@@ -104,10 +104,22 @@ function HUD() {
   onPickModel={pickModel}
   onUploadClick={onUploadClick}
 />
-      <div className="hud-right" />
-      <input ref={setFileRef} type="file" accept=".glb,.gltf" style={{ display: "none" }} onChange={onFileChange} />
-      <div className="helper-pill">Model Selector → choose or upload</div>
-    </div>
+      <div className="hud-right">
+        {active === "music" && <MusicPlayer />}
+      </div>
+
+      <input
+        ref={setFileRef}
+        type="file"
+        accept=".glb,.gltf"
+        style={{ display: "none" }}
+        onChange={onFileChange}
+      />
+
+        {active === "model" && (
+  <div className="helper-pill">Model Selector → choose or upload</div>
+)}
+
   );
 }
 
