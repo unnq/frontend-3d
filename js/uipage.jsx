@@ -1,4 +1,5 @@
 const { useState } = React;
+const MusicPlayer = window.MusicPlayer;
 
 /* Side Menu */
 function SideMenu({ active, onSelect, onToggleModelMenu, showModelMenu, onPickModel, onUploadClick }) {
