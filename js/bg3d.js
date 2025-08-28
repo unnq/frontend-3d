@@ -22,7 +22,7 @@ const lookTmp     = new THREE.Vector3();
 const railX = {
   start:    0.0,
   model:    2.8,   // default bay for Model Selector
-  missions: 8.0,
+  music: 8.0,
   worlds:   13.0, 
   settings: 18.0,
 };
