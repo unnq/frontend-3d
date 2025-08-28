@@ -21,7 +21,13 @@ function MusicPlayer({ expanded, onBack }) {
     { title: "Low-Key Beats",           url: "https://www.youtube.com/watch?v=5qap5aO4i9A",  genres: ["lofi","hiphop"] },
     { title: "City Jazz",               url: "https://www.youtube.com/watch?v=Dx5qFachd3A",  genres: ["jazz"] },
   ];
-  const GENRES = ["lofi","ambient","synthwave","hiphop","jazz"];
+
+  const GENRES = React.useMemo(() => {
+  const s = new Set();
+  playlist.forEach(item => (item.genres || []).forEach(g => s.add(g)));
+  return Array.from(s).sort();
+  }, [playlist]);
+
 
   // ---- state ----
   const [playlist, setPlaylist]     = useState(initial);
