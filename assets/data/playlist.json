@@ -1,6 +1,37 @@
 [
-  { "title": "LOST CHAPTER (PSX loop)", "url": "https://www.youtube.com/watch?v=B0Tyo91sNc8", "genres": ["lofi","ambient"] },
-  { "title": "Night Drive",             "url": "https://www.youtube.com/watch?v=Zi_XLOBDo_Y", "genres": ["synthwave"] },
-  { "title": "Lofi Hiphop",           "url": "https://www.youtube.com/watch?v=LeiW2YCrcm4", "genres": ["lofi","hiphop"] },
-  { "title": "City Jazz",               "url": "https://www.youtube.com/watch?v=Dx5qFachd3A", "genres": ["jazz"] }
+  {
+    "title": "1990s Low Poly Ambient Vaporwave",
+    "url": "https://www.youtube.com/watch?v=B0Tyo91sNc8",
+    "genres": ["90s", "ambient", "vaporwave", "lofi"]
+  },
+  {
+    "title": "2 hour adrian carti playlist",
+    "url": "https://www.youtube.com/watch?v=xV0JbvL-h58",
+    "genres": ["hiphop", "rap"]
+  },
+  {
+    "title": "Beat Soup x ElFamosoDemon - Tape 004",
+    "url": "https://www.youtube.com/watch?v=LeiW2YCrcm4",
+    "genres": ["lofi", "hiphop"]
+  },
+  {
+    "title": "Heaven/EXE [Jungle\\Breakcore\\DnB\\Dreamcast\\PSX]",
+    "url": "https://www.youtube.com/watch?v=z9e8CPULjW4",
+    "genres": ["jungle", "breakcore", "dnb"]
+  },
+  {
+    "title": "desert sand feels warm at night - 幻",
+    "url": "https://www.youtube.com/watch?v=KAcmtuzW5os",
+    "genres": ["slushwave", "vaporwave"]
+  },
+  {
+    "title": "underground memphis rap mix for great taste listeners",
+    "url": "https://www.youtube.com/watch?v=ZKu1wA6-t9M",
+    "genres": ["rap", "hiphop", "memphis", "underground"]
+  },
+  {
+    "title": "underground memphis rap mix you dreamed about",
+    "url": "https://www.youtube.com/watch?v=gZOorg4wjfU",
+    "genres": ["rap", "hiphop", "memphis", "underground"]
+  }
 ]
