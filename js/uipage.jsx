@@ -61,8 +61,8 @@ function SideMenu({ active, onSelect, onToggleModelMenu, showModelMenu, onPickMo
 
 /* HUD wrapper */
 function HUD() {
-  const [active, setActive] = useState("start");
-  const [showModelMenu, setShowModelMenu] = useState(false);
+  const [active, setActive] = React.useState("start");
+  const [showModelMenu, setShowModelMenu] = React.useState(false);
 
   let fileInputEl = null;
   const setFileRef = (el) => (fileInputEl = el);
@@ -89,21 +89,22 @@ function HUD() {
   return (
     <div className="hud">
       <SideMenu
-  active={active}
-  onSelect={(k) => {
-    if (k !== "exit") window.UIScene?.moveTo(k);  // slide camera to that bay
-    setActive(k);
-    setShowModelMenu(false);
-  }}
-  onToggleModelMenu={() => {
-    window.UIScene?.moveTo("model");              // ensure we’re at the model bay
-    setActive("model");
-    setShowModelMenu(v => !v);
-  }}
-  showModelMenu={showModelMenu}
-  onPickModel={pickModel}
-  onUploadClick={onUploadClick}
-/>
+        active={active}
+        onSelect={(k) => {
+          if (k !== "exit") window.UIScene?.moveTo(k);
+          setActive(k);
+          setShowModelMenu(false);
+        }}
+        onToggleModelMenu={() => {
+          window.UIScene?.moveTo("model");
+          setActive("model");
+          setShowModelMenu((v) => !v);
+        }}
+        showModelMenu={showModelMenu}
+        onPickModel={pickModel}
+        onUploadClick={onUploadClick}
+      />
+
       <div className="hud-right">
         {active === "music" && <MusicPlayer />}
       </div>
@@ -116,12 +117,13 @@ function HUD() {
         onChange={onFileChange}
       />
 
-        {active === "model" && (
-  <div className="helper-pill">Model Selector → choose or upload</div>
-)}
-
+      {active === "model" && (
+        <div className="helper-pill">Model Selector → choose or upload</div>
+      )}
+    </div>
   );
 }
+
 
 /* Mount the HUD */
 const root = ReactDOM.createRoot(document.getElementById("ui-root"));
