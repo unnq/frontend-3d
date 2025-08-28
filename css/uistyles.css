@@ -193,10 +193,118 @@ body {
 }
 
 
-/* Right column placeholder for future HUD elements */
-.hud-right {
-  pointer-events: none; /* keep canvas interactive */
+/* ---- Music HUD ---- */
+.hud-right { position: relative; pointer-events: auto; } /* enable clicks on right side */
+
+.music-wrap {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: min(520px, 46vw);
+  display: grid;
+  gap: 12px;
+  pointer-events: auto;
 }
+
+.music-top {
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nowplaying {
+  font-family: "Space Mono", monospace;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 6px rgba(0,0,0,0.35);
+}
+
+.controls {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.player-box {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  /* no background, no border — seamless */
+  overflow: hidden;
+  border-radius: 8px; /* soften the video corners a touch */
+}
+
+/* Ghost button (text-only vibe, with a subtle outline) */
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-family: "Space Mono", monospace;
+  letter-spacing: 0.06em;
+  transition: color .15s ease, border-color .15s ease, transform .06s ease;
+}
+.btn-ghost:hover,
+.btn-ghost:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.btn-ghost:active { transform: translateY(0); }
+
+/* Chips (genre filters) */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-family: "Space Mono", monospace;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  transition: color .15s ease, border-color .15s ease, transform .06s ease;
+}
+.chip:hover,
+.chip:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.chip.is-active {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.chip.clear { opacity: 0.85; }
+
+/* Playlist list */
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.list-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 6px 0;
+  cursor: pointer;
+  font-family: "Source Sans Pro", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  transition: color .15s ease, transform .06s ease, text-shadow .15s ease;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.25), 0 0 6px rgba(0,0,0,0.35);
+}
+.list-item:hover,
+.list-item:focus-visible {
+  color: var(--accent);
+  transform: translateX(1px);
+  outline: none;
+  text-shadow: 0 0 10px rgba(124,77,255,0.55), 0 1px 0 rgba(0,0,0,0.25);
+}
+.list-item.is-active { color: var(--accent); }
+.list-empty { color: var(--muted); font-size: 14px; }
+
+/* Labels */
+.label { font-size: 12px; color: var(--muted); margin-right: 6px; }
+.vol-label { margin-left: 10px; }
+
 
 /* Tiny helper pill — keep subtle & text-only feel */
 .helper-pill {
