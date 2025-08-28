@@ -82,6 +82,27 @@ function MusicPlayer({ expanded, onBack }) {
     } catch {}
   }, [currentUrl]);
 
+  useEffect(() => {
+  const PLAYLIST_URL = "./assets/data/playlist.json";
+  // Tip during development: append ?v=${Date.now()} to bust CDN cache
+  fetch(PLAYLIST_URL, { cache: "no-store" })
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      if (Array.isArray(data) && data.length) {
+        setPlaylist(data);
+        setCurrentUrl(data[0].url);
+        setCurrentTitle(data[0].title);
+      }
+    })
+    .catch(err => {
+      console.warn("Playlist load failed, using fallback:", err);
+    });
+}, []);
+
+
   useEffect(() => { const p = playerRef.current; if (!p) return; try { isPlaying ? p.playVideo() : p.pauseVideo(); } catch {} }, [isPlaying]);
   useEffect(() => { const p = playerRef.current; if (!p) return; try { muted ? p.mute() : p.unMute(); } catch {} }, [muted]);
   useEffect(() => { const p = playerRef.current; if (!p) return; try { p.setVolume(Math.round(volume * 100)); } catch {} }, [volume]);
