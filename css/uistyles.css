@@ -223,12 +223,13 @@ body {
   align-items: center;
 }
 
+/* Video box: don’t let it eat all the height on shorter viewports */
 .player-box {
   width: 100%;
   aspect-ratio: 16 / 9;
-  /* no background, no border — seamless */
+  max-height: 45vh;     /* cap video height so the list gets space */
   overflow: hidden;
-  border-radius: 8px; /* soften the video corners a touch */
+  border-radius: 8px;   /* soften the video corners a touch */
 }
 
 /* Ghost button (text-only vibe, with a subtle outline) */
@@ -337,15 +338,15 @@ body {
 .music-overlay.is-closed { opacity: 0; pointer-events: none; }
 
 /* Centered transparent panel
-   Reserve rows: 1) top controls, 2) player, 3) search+chips, 4) LIST (scrolls), 5) add form */
+   Rows: 1) top, 2) player, 3) search+chips, 4) LIST (scrolls, with minimum), 5) add form */
 .music-panel {
   width: min(720px, 92vw);
   display: grid;
   gap: 12px;
   padding: 12px;
-  grid-template-rows: auto auto auto 1fr auto;  /* list grows & scrolls */
-  max-height: min(90vh, 720px);                 /* keep within screen */
-  overflow: hidden;                              /* list handles its own scroll */
+  grid-template-rows: auto auto auto minmax(240px, 1fr) auto; /* list >= 240px tall */
+  max-height: 92vh;                 /* keep within screen */
+  overflow: hidden;                  /* list handles its own scroll */
   /* No background — fully seamless */
 }
 
@@ -399,6 +400,7 @@ body {
 /* Mobile tweaks */
 @media (max-width: 520px) {
   .music-panel { width: 92vw; max-height: 92vh; }
+  .player-box { max-height: 38vh; }
   .miniplayer { width: 94vw; }
   .controls input[type="range"],
   .mini-controls input[type="range"] { width: 120px; }
