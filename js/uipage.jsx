@@ -5,7 +5,7 @@ function SideMenu({ active, onSelect, onToggleModelMenu, showModelMenu, onPickMo
   const items = [
     { key: "start",    label: "Start" },
     { key: "model",    label: "Model Selector" },
-    { key: "missions", label: "Missions" },
+    { key: "music",    label: "Music" },
     { key: "worlds",   label: "Worlds" },
     { key: "settings", label: "Settings" },
     { key: "exit",     label: "Exit" },
