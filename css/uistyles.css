@@ -417,7 +417,7 @@ body {
   grid-template-rows: auto auto 1fr auto;
   max-height: min(82vh, 640px);
   overflow: hidden; /* list scrolls inside */
-  /* no background for seamless look */
+  background: #000000f6;
 }
 
 .filters-header { display: flex; align-items: center; gap: 8px; }
