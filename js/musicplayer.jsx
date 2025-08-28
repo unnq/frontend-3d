@@ -22,13 +22,7 @@ function MusicPlayer({ expanded, onBack }) {
     { title: "City Jazz",               url: "https://www.youtube.com/watch?v=Dx5qFachd3A",  genres: ["jazz"] },
   ];
 
-  const GENRES = React.useMemo(() => {
-  const s = new Set();
-  playlist.forEach(item => (item.genres || []).forEach(g => s.add(g)));
-  return Array.from(s).sort();
-  }, [playlist]);
-
-
+ 
   // ---- state ----
   const [playlist, setPlaylist]     = useState(initial);
   const [currentUrl, setCurrentUrl] = useState(initial[0].url);
@@ -39,6 +33,12 @@ function MusicPlayer({ expanded, onBack }) {
 
   const [search, setSearch]         = useState("");
   const [selected, setSelected]     = useState(() => new Set());
+
+  const GENRES = React.useMemo(() => {
+  const s = new Set();
+  playlist.forEach(item => (item.genres || []).forEach(g => s.add(g)));
+  return Array.from(s).sort();
+  }, [playlist]);
 
   // ---- YT Player ----
   const playerDivRef = useRef(null);
