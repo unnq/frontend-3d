@@ -89,27 +89,30 @@ function HUD() {
 
   return (
     <div className="hud">
-      <SideMenu
-        active={active}
-        onSelect={(k) => {
-          if (k !== "exit") window.UIScene?.moveTo(k);
-          setActive(k);
-          setShowModelMenu(false);
-        }}
-        onToggleModelMenu={() => {
-          window.UIScene?.moveTo("model");
-          setActive("model");
-          setShowModelMenu((v) => !v);
-        }}
-        showModelMenu={showModelMenu}
-        onPickModel={pickModel}
-        onUploadClick={onUploadClick}
-      />
+      {/* Hide the left menu while in Music */}
+      {active !== "music" && (
+        <SideMenu
+          active={active}
+          onSelect={(k) => {
+            if (k !== "exit") window.UIScene?.moveTo(k);
+            setActive(k);
+            setShowModelMenu(false);
+          }}
+          onToggleModelMenu={() => {
+            window.UIScene?.moveTo("model");
+            setActive("model");
+            setShowModelMenu((v) => !v);
+          }}
+          showModelMenu={showModelMenu}
+          onPickModel={pickModel}
+          onUploadClick={onUploadClick}
+        />
+      )}
 
-      <div className="hud-right">
-        {active === "music" && <MusicPlayer />}
-      </div>
+      {/* Right side placeholder (unused now, keep if you like) */}
+      <div className="hud-right" />
 
+      {/* Hidden file input for Model Selector uploads */}
       <input
         ref={setFileRef}
         type="file"
@@ -118,12 +121,25 @@ function HUD() {
         onChange={onFileChange}
       />
 
+      {/* Only show the helper pill while in Model */}
       {active === "model" && (
         <div className="helper-pill">Model Selector → choose or upload</div>
       )}
+
+      {/* Music is ALWAYS mounted so playback persists.
+          expanded=true shows the centered overlay; false shows the mini-player bar */}
+      <MusicPlayer
+        expanded={active === "music"}
+        onBack={() => {
+          setActive("start");
+          setShowModelMenu(false);
+          window.UIScene?.moveTo("start");
+        }}
+      />
     </div>
   );
 }
+
 
 
 /* Mount the HUD */
