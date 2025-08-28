@@ -336,22 +336,42 @@ body {
 .music-overlay.is-open { opacity: 1; pointer-events: auto; }
 .music-overlay.is-closed { opacity: 0; pointer-events: none; }
 
-/* Centered transparent panel */
+/* Centered transparent panel
+   Reserve rows: 1) top controls, 2) player, 3) search+chips, 4) LIST (scrolls), 5) add form */
 .music-panel {
   width: min(720px, 92vw);
   display: grid;
   gap: 12px;
   padding: 12px;
+  grid-template-rows: auto auto auto 1fr auto;  /* list grows & scrolls */
+  max-height: min(90vh, 720px);                 /* keep within screen */
+  overflow: hidden;                              /* list handles its own scroll */
   /* No background — fully seamless */
 }
 
-.music-back {
-  margin-right: auto;
-}
+.music-back { margin-right: auto; }
 
 /* Keep your existing styles working */
 .music-top { align-items: center; justify-content: space-between; }
 .player-box { width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; }
+
+/* The list takes remaining space and scrolls */
+.music-panel .list {
+  overflow: auto;
+  padding-right: 6px;  /* tiny gutter for scrollbar */
+  margin-right: -6px;  /* pull content back so it aligns */
+}
+
+/* Subtle scrollbar for the list (optional) */
+.music-panel .list::-webkit-scrollbar { width: 8px; }
+.music-panel .list::-webkit-scrollbar-track { background: transparent; }
+.music-panel .list::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15);
+  border-radius: 6px;
+}
+.music-panel .list:hover::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.28);
+}
 
 /* Mini-player bar (visible when overlay is closed) */
 .miniplayer {
@@ -364,8 +384,8 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  pointer-events: auto;
-  z-index: 55;
+  pointer-events: auto;   /* clickable */
+  z-index: 70;            /* above closed overlay */
   /* transparent, no panel */
 }
 .mini-left {
@@ -378,12 +398,11 @@ body {
 
 /* Mobile tweaks */
 @media (max-width: 520px) {
-  .music-panel { width: 92vw; }
+  .music-panel { width: 92vw; max-height: 92vh; }
   .miniplayer { width: 94vw; }
   .controls input[type="range"],
   .mini-controls input[type="range"] { width: 120px; }
 }
-
 
 /* Mobile tweaks */
 @media (max-width: 760px) {
