@@ -465,3 +465,47 @@ body {
   .menu-item { font-size: 15px; }
   .menu-title { font-size: 16px; }
 }
+
+/* ===== Worlds confirmation overlay ===== */
+.worlds-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 75;                   /* above HUD, below filters (80) */
+  transition: opacity .2s ease;
+}
+.worlds-overlay.is-open { opacity: 1; pointer-events: auto; }
+.worlds-overlay.is-closed { opacity: 0; pointer-events: none; }
+
+/* Transparent, centered stack (no panel background) */
+.worlds-panel {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  text-align: center;
+}
+
+.worlds-title {
+  font-family: "Space Mono", monospace;
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  text-shadow: 0 0 10px rgba(0,0,0,0.45);
+}
+
+/* Reuse your text-only menu look for the actions */
+.worlds-actions {
+  display: inline-flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Keep buttons compact (override menu-item width in this context) */
+.worlds-actions .menu-item {
+  width: auto;
+  padding: 6px 10px;
+}
+
