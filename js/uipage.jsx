@@ -68,14 +68,45 @@ function SideMenu({
   );
 }
 
+function WorldsConfirm({ open, onConfirm, onCancel }) {
+  // backdrop click + Esc/Enter
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") onCancel();
+      if (e.key === "Enter")  onConfirm();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onConfirm, onCancel]);
+
+  return (
+    <div
+      className={`worlds-overlay ${open ? "is-open" : "is-closed"}`}
+      aria-hidden={!open}
+      onClick={onCancel}               // click backdrop = No
+    >
+      <div className="worlds-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="worlds-title">Are you sure?</div>
+        <div className="worlds-actions">
+          <button className="menu-item" onClick={onConfirm}>Yes</button>
+          <button className="menu-item" onClick={onCancel}>No</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 /* HUD wrapper */
 function HUD() {
   const [active, setActive] = React.useState("start");
   const [showModelMenu, setShowModelMenu] = React.useState(false);
+  const [showWorldsConfirm, setShowWorldsConfirm] = React.useState(false); // NEW
 
+  // file upload (unchanged)
   let fileInputEl = null;
   const setFileRef = (el) => (fileInputEl = el);
-
   const onUploadClick = () => fileInputEl?.click();
   const onFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -89,6 +120,51 @@ function HUD() {
     e.target.value = "";
     setShowModelMenu(false);
   };
+
+  const pickModel = (url) => {
+    window.UIScene?.setModelURL(url);
+    setShowModelMenu(false);
+  };
+
+  // Worlds flow
+  const openWorldsConfirm = () => {
+    setActive("worlds");
+    window.UIScene?.moveTo?.("worlds");   // optional camera slide
+    setShowWorldsConfirm(true);
+  };
+  const confirmWorlds = () => {
+    window.location.href = "https://unnq.github.io/3d-webgl-test/environment.html";
+  };
+  const cancelWorlds = () => {
+    setShowWorldsConfirm(false);
+    setActive("start");
+    window.UIScene?.moveTo?.("start");    // optional camera slide back
+  };
+
+  return (
+    <div className="hud">
+      <SideMenu
+        active={active}
+        onSelect={(k) => { 
+          if (k !== "worlds") { setActive(k); setShowModelMenu(false); } 
+        }}
+        onToggleModelMenu={() => { setActive("model"); setShowModelMenu(v => !v); }}
+        showModelMenu={showModelMenu}
+        onPickModel={pickModel}
+        onUploadClick={onUploadClick}
+        onWorlds={openWorldsConfirm}          // NEW
+      />
+
+      <div className="hud-right" />
+      <input ref={setFileRef} type="file" accept=".glb,.gltf" style={{ display: "none" }} onChange={onFileChange} />
+      <div className="helper-pill">Model Selector → choose or upload</div>
+
+      {/* Worlds confirmation overlay */}
+      <WorldsConfirm open={showWorldsConfirm} onConfirm={confirmWorlds} onCancel={cancelWorlds} />
+    </div>
+  );
+}
+
 
   const pickModel = (url) => {
     window.UIScene?.setModelURL(url);
