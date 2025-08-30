@@ -66,7 +66,7 @@ function SideMenu({
                   </button>
                 </li>
               </ul>
-            ))}
+            )}
           </li>
         ))}
       </ul>
