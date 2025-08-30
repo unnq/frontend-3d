@@ -2,17 +2,24 @@ const { useState } = React;
 const MusicPlayer = window.MusicPlayer;
 
 /* Side Menu */
-function SideMenu({ active, onSelect, onToggleModelMenu, showModelMenu, onPickModel, onUploadClick }) {
+function SideMenu({
+  active,
+  onSelect,
+  onToggleModelMenu,
+  showModelMenu,
+  onPickModel,
+  onUploadClick,
+  onWorlds,            // NEW
+}) {
   const items = [
     { key: "start",    label: "Start" },
     { key: "model",    label: "Model Selector" },
     { key: "music",    label: "Music" },
-    { key: "worlds",   label: "Worlds" },
+    { key: "worlds",   label: "Worlds" },      // triggers confirm
     { key: "settings", label: "Settings" },
     { key: "exit",     label: "Exit" },
   ];
 
-  // Your models (paths are case-sensitive on GH Pages)
   const MODEL_OPTIONS = [
     { key: "modelA", label: "Model A", url: "assets/models/bmw_m3_gtr_-_psx_style_mw_2012_java.glb" },
     { key: "modelB", label: "Model B", url: "assets/models/macbook_psx_style.glb" },
@@ -29,9 +36,10 @@ function SideMenu({ active, onSelect, onToggleModelMenu, showModelMenu, onPickMo
             <button
               className={`menu-item ${active === it.key ? "is-active" : ""}`}
               onClick={() => {
-                if (it.key === "exit") { window.location.href = "./index.html"; return; } // go home
-                if (it.key === "model") onToggleModelMenu();
-                else onSelect(it.key);
+                if (it.key === "exit")   { window.location.href = "./index.html"; return; }
+                if (it.key === "worlds") { onWorlds?.(); return; }      // NEW
+                if (it.key === "model")  { onToggleModelMenu(); }
+                else { onSelect(it.key); }
               }}
             >
               {it.label}
