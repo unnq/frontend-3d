@@ -1,7 +1,8 @@
+// js/uipage.jsx
 const { useState } = React;
-const MusicPlayer = window.MusicPlayer;
+const MusicPlayer = window.MusicPlayer || (() => null);
 
-/* Side Menu */
+/* ============== Side Menu ============== */
 function SideMenu({
   active,
   onSelect,
@@ -9,13 +10,13 @@ function SideMenu({
   showModelMenu,
   onPickModel,
   onUploadClick,
-  onWorlds,            // NEW
+  onWorlds, // NEW
 }) {
   const items = [
     { key: "start",    label: "Start" },
     { key: "model",    label: "Model Selector" },
     { key: "music",    label: "Music" },
-    { key: "worlds",   label: "Worlds" },      // triggers confirm
+    { key: "worlds",   label: "Worlds" },     // confirm dialog
     { key: "settings", label: "Settings" },
     { key: "exit",     label: "Exit" },
   ];
@@ -37,9 +38,10 @@ function SideMenu({
               className={`menu-item ${active === it.key ? "is-active" : ""}`}
               onClick={() => {
                 if (it.key === "exit")   { window.location.href = "./index.html"; return; }
-                if (it.key === "worlds") { onWorlds?.(); return; }      // NEW
-                if (it.key === "model")  { onToggleModelMenu(); }
-                else { onSelect(it.key); }
+                if (it.key === "worlds") { onWorlds?.(); return; }
+                if (it.key === "music")  { onSelect("music"); window.UIScene?.moveTo?.("music"); return; }
+                if (it.key === "model")  { onToggleModelMenu(); return; }
+                onSelect(it.key);
               }}
             >
               {it.label}
@@ -49,13 +51,19 @@ function SideMenu({
               <ul className="menu-sub">
                 {MODEL_OPTIONS.map(opt => (
                   <li key={opt.key}>
-                    <button className="menu-item-sub" onClick={() => onPickModel(opt.url)} title={opt.url}>
+                    <button
+                      className="menu-item-sub"
+                      onClick={() => onPickModel(opt.url)}
+                      title={opt.url}
+                    >
                       {opt.label}
                     </button>
                   </li>
                 ))}
                 <li>
-                  <button className="menu-item-sub" onClick={onUploadClick}>Upload .glb / .gltf…</button>
+                  <button className="menu-item-sub" onClick={onUploadClick}>
+                    Upload .glb / .gltf…
+                  </button>
                 </li>
               </ul>
             )}
@@ -68,8 +76,8 @@ function SideMenu({
   );
 }
 
+/* ============== Worlds Confirm (centered, text-only) ============== */
 function WorldsConfirm({ open, onConfirm, onCancel }) {
-  // backdrop click + Esc/Enter
   React.useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
@@ -84,7 +92,7 @@ function WorldsConfirm({ open, onConfirm, onCancel }) {
     <div
       className={`worlds-overlay ${open ? "is-open" : "is-closed"}`}
       aria-hidden={!open}
-      onClick={onCancel}               // click backdrop = No
+      onClick={onCancel}           // backdrop = No
     >
       <div className="worlds-panel" onClick={(e) => e.stopPropagation()}>
         <div className="worlds-title">Are you sure?</div>
@@ -97,14 +105,13 @@ function WorldsConfirm({ open, onConfirm, onCancel }) {
   );
 }
 
-
-/* HUD wrapper */
+/* ============== HUD Wrapper ============== */
 function HUD() {
-  const [active, setActive] = React.useState("start");
-  const [showModelMenu, setShowModelMenu] = React.useState(false);
-  const [showWorldsConfirm, setShowWorldsConfirm] = React.useState(false); // NEW
+  const [active, setActive] = useState("start");
+  const [showModelMenu, setShowModelMenu] = useState(false);
+  const [showWorldsConfirm, setShowWorldsConfirm] = useState(false);
 
-  // file upload (unchanged)
+  // hidden file input (for model uploads)
   let fileInputEl = null;
   const setFileRef = (el) => (fileInputEl = el);
   const onUploadClick = () => fileInputEl?.click();
@@ -126,10 +133,10 @@ function HUD() {
     setShowModelMenu(false);
   };
 
-  // Worlds flow
+  // Worlds confirm flow
   const openWorldsConfirm = () => {
     setActive("worlds");
-    window.UIScene?.moveTo?.("worlds");   // optional camera slide
+    window.UIScene?.moveTo?.("worlds");     // optional camera slide
     setShowWorldsConfirm(true);
   };
   const confirmWorlds = () => {
@@ -138,37 +145,7 @@ function HUD() {
   const cancelWorlds = () => {
     setShowWorldsConfirm(false);
     setActive("start");
-    window.UIScene?.moveTo?.("start");    // optional camera slide back
-  };
-
-  return (
-    <div className="hud">
-      <SideMenu
-        active={active}
-        onSelect={(k) => { 
-          if (k !== "worlds") { setActive(k); setShowModelMenu(false); } 
-        }}
-        onToggleModelMenu={() => { setActive("model"); setShowModelMenu(v => !v); }}
-        showModelMenu={showModelMenu}
-        onPickModel={pickModel}
-        onUploadClick={onUploadClick}
-        onWorlds={openWorldsConfirm}          // NEW
-      />
-
-      <div className="hud-right" />
-      <input ref={setFileRef} type="file" accept=".glb,.gltf" style={{ display: "none" }} onChange={onFileChange} />
-      <div className="helper-pill">Model Selector → choose or upload</div>
-
-      {/* Worlds confirmation overlay */}
-      <WorldsConfirm open={showWorldsConfirm} onConfirm={confirmWorlds} onCancel={cancelWorlds} />
-    </div>
-  );
-}
-
-
-  const pickModel = (url) => {
-    window.UIScene?.setModelURL(url);
-    setShowModelMenu(false);
+    window.UIScene?.moveTo?.("start");      // optional camera slide back
   };
 
   return (
@@ -177,26 +154,16 @@ function HUD() {
       {active !== "music" && (
         <SideMenu
           active={active}
-          onSelect={(k) => {
-            if (k !== "exit") window.UIScene?.moveTo(k);
-            setActive(k);
-            setShowModelMenu(false);
-          }}
-          onToggleModelMenu={() => {
-            window.UIScene?.moveTo("model");
-            setActive("model");
-            setShowModelMenu((v) => !v);
-          }}
+          onSelect={(k) => { setActive(k); setShowModelMenu(false); }}
+          onToggleModelMenu={() => { setActive("model"); setShowModelMenu(v => !v); }}
           showModelMenu={showModelMenu}
           onPickModel={pickModel}
           onUploadClick={onUploadClick}
+          onWorlds={openWorldsConfirm}
         />
       )}
 
-      {/* Right side placeholder (unused now, keep if you like) */}
       <div className="hud-right" />
-
-      {/* Hidden file input for Model Selector uploads */}
       <input
         ref={setFileRef}
         type="file"
@@ -204,28 +171,23 @@ function HUD() {
         style={{ display: "none" }}
         onChange={onFileChange}
       />
+      <div className="helper-pill">Model Selector → choose or upload</div>
 
-      {/* Only show the helper pill while in Model */}
-      {active === "model" && (
-        <div className="helper-pill">Model Selector → choose or upload</div>
-      )}
+      {/* Centered Worlds confirmation */}
+      <WorldsConfirm open={showWorldsConfirm} onConfirm={confirmWorlds} onCancel={cancelWorlds} />
 
-      {/* Music is ALWAYS mounted so playback persists.
-          expanded=true shows the centered overlay; false shows the mini-player bar */}
+      {/* Music overlay + mini-player (always mounted) */}
       <MusicPlayer
         expanded={active === "music"}
         onBack={() => {
           setActive("start");
-          setShowModelMenu(false);
-          window.UIScene?.moveTo("start");
+          window.UIScene?.moveTo?.("start");
         }}
       />
     </div>
   );
 }
 
-
-
-/* Mount the HUD */
+/* ============== Mount ============== */
 const root = ReactDOM.createRoot(document.getElementById("ui-root"));
 root.render(<HUD />);
