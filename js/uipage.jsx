@@ -10,13 +10,13 @@ function SideMenu({
   showModelMenu,
   onPickModel,
   onUploadClick,
-  onWorlds, // NEW
+  onWorlds,
 }) {
   const items = [
     { key: "start",    label: "Start" },
     { key: "model",    label: "Model Selector" },
     { key: "music",    label: "Music" },
-    { key: "worlds",   label: "Worlds" },     // confirm dialog
+    { key: "worlds",   label: "Worlds" },
     { key: "settings", label: "Settings" },
     { key: "exit",     label: "Exit" },
   ];
@@ -32,15 +32,15 @@ function SideMenu({
       <div className="menu-title">demosite ui</div>
 
       <ul className="menu-list">
-        {items.map(it => (
+        {items.map((it) => (
           <li key={it.key} style={{ position: "relative" }}>
             <button
               className={`menu-item ${active === it.key ? "is-active" : ""}`}
               onClick={() => {
                 if (it.key === "exit")   { window.location.href = "./index.html"; return; }
                 if (it.key === "worlds") { onWorlds?.(); return; }
-                if (it.key === "music")  { onSelect("music"); window.UIScene?.moveTo?.("music"); return; }
                 if (it.key === "model")  { onToggleModelMenu(); return; }
+                // For start/music/settings we just select; HUD will call moveTo(it.key)
                 onSelect(it.key);
               }}
             >
@@ -49,7 +49,7 @@ function SideMenu({
 
             {it.key === "model" && showModelMenu && (
               <ul className="menu-sub">
-                {MODEL_OPTIONS.map(opt => (
+                {MODEL_OPTIONS.map((opt) => (
                   <li key={opt.key}>
                     <button
                       className="menu-item-sub"
@@ -66,7 +66,7 @@ function SideMenu({
                   </button>
                 </li>
               </ul>
-            )}
+            ))}
           </li>
         ))}
       </ul>
@@ -92,7 +92,7 @@ function WorldsConfirm({ open, onConfirm, onCancel }) {
     <div
       className={`worlds-overlay ${open ? "is-open" : "is-closed"}`}
       aria-hidden={!open}
-      onClick={onCancel}           // backdrop = No
+      onClick={onCancel} // backdrop = No
     >
       <div className="worlds-panel" onClick={(e) => e.stopPropagation()}>
         <div className="worlds-title">Are you sure?</div>
@@ -115,6 +115,7 @@ function HUD() {
   let fileInputEl = null;
   const setFileRef = (el) => (fileInputEl = el);
   const onUploadClick = () => fileInputEl?.click();
+
   const onFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -133,19 +134,28 @@ function HUD() {
     setShowModelMenu(false);
   };
 
+  // Centralized camera movement for all standard sections
+  const selectAndMove = (key) => {
+    setActive(key);
+    setShowModelMenu(false);
+    window.UIScene?.moveTo?.(key);
+  };
+
   // Worlds confirm flow
   const openWorldsConfirm = () => {
     setActive("worlds");
-    window.UIScene?.moveTo?.("worlds");     // optional camera slide
+    window.UIScene?.moveTo?.("worlds"); // optional slide to Worlds
     setShowWorldsConfirm(true);
   };
+
   const confirmWorlds = () => {
     window.location.href = "https://unnq.github.io/3d-webgl-test/environment.html";
   };
+
   const cancelWorlds = () => {
     setShowWorldsConfirm(false);
     setActive("start");
-    window.UIScene?.moveTo?.("start");      // optional camera slide back
+    window.UIScene?.moveTo?.("start");
   };
 
   return (
@@ -154,8 +164,12 @@ function HUD() {
       {active !== "music" && (
         <SideMenu
           active={active}
-          onSelect={(k) => { setActive(k); setShowModelMenu(false); }}
-          onToggleModelMenu={() => { setActive("model"); setShowModelMenu(v => !v); }}
+          onSelect={selectAndMove} // will call moveTo(key)
+          onToggleModelMenu={() => {
+            setActive("model");
+            setShowModelMenu((v) => !v);
+            window.UIScene?.moveTo?.("model"); // ensure camera moves when opening Model Selector
+          }}
           showModelMenu={showModelMenu}
           onPickModel={pickModel}
           onUploadClick={onUploadClick}
